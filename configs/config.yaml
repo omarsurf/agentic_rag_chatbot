@@ -1,0 +1,312 @@
+# =============================================================================
+# Agentic RAG GRI/FAR - Configuration Principale
+# =============================================================================
+# Les valeurs peuvent être surchargées par les variables d'environnement
+
+project:
+  name: "GRI-RAG"
+  version: "0.1.0"
+  description: "Système RAG agentique pour le GRI des FAR"
+
+# === Hugging Face ===
+huggingface:
+  # Les clés API sont dans .env
+  models:
+    router: ${HF_ROUTER_MODEL:-mistralai/Mistral-7B-Instruct-v0.3}
+    orchestrator: ${HF_ORCHESTRATOR_MODEL:-mistralai/Mixtral-8x7B-Instruct-v0.1}
+    generation: ${HF_GENERATION_MODEL:-mistralai/Mixtral-8x7B-Instruct-v0.1}
+    evaluation: ${HF_EVAL_MODEL:-mistralai/Mixtral-8x7B-Instruct-v0.1}
+
+  # Timeouts et retries
+  timeout_seconds: 120
+  max_retries: 3
+  retry_delay_seconds: 1
+
+# === Embeddings ===
+embeddings:
+  # Modèle multilingue FR+EN - NON NÉGOCIABLE
+  model: "paraphrase-multilingual-mpnet-base-v2"
+  dimension: 768
+  batch_size: 32
+  normalize: true
+
+# === Vector Store ===
+vector_store:
+  provider: "qdrant"  # qdrant | chromadb
+
+  qdrant:
+    url: ${QDRANT_URL:-localhost}
+    port: ${QDRANT_PORT:-6333}
+    api_key: ${QDRANT_API_KEY:-}
+    prefer_grpc: true
+    timeout: 30
+
+  chromadb:
+    persist_directory: "./data/chromadb"
+
+  collections:
+    main: "gri_main"
+    glossary: "gri_glossary"
+
+# === Retrieval ===
+retrieval:
+  # RRF Fusion parameters
+  rrf:
+    alpha: 0.6  # Dense weight (sparse = 1 - alpha)
+    k: 60       # RRF constant (Cormack 2009)
+
+  # Search defaults
+  defaults:
+    n_results: 5
+    n_initial_fetch: 20
+    min_score: 0.35
+
+  # Reranking
+  reranker:
+    model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    top_k: 10
+    batch_size: 16
+
+  # MMR (Maximal Marginal Relevance)
+  mmr:
+    lambda: 0.7
+    enabled_for:
+      - PHASE_COMPLETE
+      - COMPARAISON
+
+# === Query Router ===
+router:
+  intents:
+    - DEFINITION
+    - PROCESSUS
+    - JALON
+    - PHASE_COMPLETE
+    - COMPARAISON
+    - CIR
+
+  # Configuration par intent
+  intent_config:
+    DEFINITION:
+      search_mode: sparse
+      primary_index: glossary
+      n_initial: 5
+      use_reranker: false
+      temperature: 0.0
+
+    PROCESSUS:
+      search_mode: hybrid
+      primary_index: main
+      filters:
+        section_type: process
+      n_initial: 20
+      use_reranker: true
+      use_parent: true
+      temperature: 0.1
+
+    JALON:
+      search_mode: hybrid
+      primary_index: main
+      filters:
+        section_type: milestone
+      n_initial: 5
+      use_reranker: false
+      return_complete: true
+      temperature: 0.0
+
+    PHASE_COMPLETE:
+      search_mode: dense
+      primary_index: main
+      filters:
+        section_type: phase
+      n_initial: 15
+      use_reranker: true
+      use_parent: true
+      use_mmr: true
+      temperature: 0.1
+
+    COMPARAISON:
+      search_mode: hybrid
+      primary_index: main
+      n_initial: 30
+      use_reranker: true
+      use_mmr: true
+      multi_query: true
+      temperature: 0.1
+
+    CIR:
+      search_mode: hybrid
+      primary_index: main
+      filters:
+        cycle: CIR
+      n_initial: 20
+      use_reranker: true
+      include_gri_mapping: true
+      temperature: 0.1
+
+# === Agent ===
+agent:
+  max_iterations: 5
+  max_reformulations_per_tool: 2
+  timeout_seconds: 120
+
+  # Tools disponibles
+  tools:
+    - retrieve_gri_chunks
+    - lookup_gri_glossary
+    - get_milestone_criteria
+    - compare_approaches
+    - get_phase_summary
+
+# === Generation ===
+generation:
+  # Températures par type de réponse
+  temperatures:
+    definition: 0.0      # Fidélité normative absolue
+    milestone: 0.0       # Critères exhaustifs
+    process: 0.1
+    phase_complete: 0.1
+    comparison: 0.1
+    general: 0.1
+
+  # Max tokens par type
+  max_tokens:
+    definition: 256
+    milestone: 1024
+    process: 1536
+    phase_complete: 2048
+    comparison: 2048
+    general: 1024
+
+# === Ingestion ===
+ingestion:
+  # Chunking strategies by content type
+  chunking:
+    definition:
+      size_range: [150, 300]
+      overlap: 0
+      boundary: term
+
+    principle:
+      size_range: [400, 600]
+      overlap: 0
+      boundary: section
+
+    phase:
+      parent_size: 2048
+      child_size: 512
+      child_overlap: 64
+      boundary: sentence
+
+    milestone:
+      size_range: [600, 900]
+      overlap: 0
+      boundary: milestone  # NEVER split milestones
+
+    process:
+      size_range: [400, 600]
+      overlap: 0
+      boundary: activity
+
+    cir:
+      size_range: [400, 600]
+      overlap: 0
+      boundary: section
+
+    table:
+      row_size_range: [100, 250]
+      summary_size_range: [300, 500]
+
+  # Batch size for indexing
+  batch_size: 100
+
+  # Validation
+  validation:
+    min_chunk_length: 80
+    max_token_estimate: 1000
+    require_context_prefix: true
+
+# === Evaluation ===
+evaluation:
+  # Quality gates (seuils bloquants)
+  quality_gates:
+    faithfulness: 0.85
+    answer_relevance: 0.80
+    context_recall: 0.75
+    context_precision: 0.70
+    term_accuracy: 0.95  # CRITIQUE
+    latency_p95_ms: 8000
+
+  # Golden dataset
+  golden_dataset:
+    path: "./data/golden_dataset.json"
+    n_questions: 50
+    categories:
+      definitions: 10
+      processus: 10
+      jalons: 10
+      phases: 8
+      comparaisons: 7
+      cir: 5
+
+# === CIR / GRI Mapping ===
+cir_gri_mapping:
+  J1: ["M0", "M1"]
+  J2: ["M2", "M3", "M4"]
+  J3: ["M5", "M6"]
+  J4: ["SAR"]
+  J5: ["SAR"]
+  J6: ["M8"]
+
+# === GRI Milestones ===
+gri_milestones:
+  - id: M0
+    name: "ASR - Acceptable System Review"
+    phase_entry: 1
+  - id: M1
+    name: "SRR - System Requirements Review"
+    phase_entry: 2
+  - id: M2
+    name: "SFR - System Functional Review"
+    phase_entry: 2
+  - id: M3
+    name: "PDR - Preliminary Design Review"
+    phase_entry: 3
+  - id: M4
+    name: "CDR - Critical Design Review"
+    phase_entry: 3
+  - id: M5
+    name: "IRR - Integration Readiness Review"
+    phase_entry: 4
+  - id: M6
+    name: "TRR - Test Readiness Review"
+    phase_entry: 4
+  - id: M7
+    name: "PRR - Production Readiness Review"
+    phase_entry: 5
+  - id: M8
+    name: "ORR - Operational Readiness Review"
+    phase_entry: 6
+  - id: M9
+    name: "MNR - Mission Needs Review"
+    phase_entry: 7
+
+# === Logging ===
+logging:
+  level: ${LOG_LEVEL:-INFO}
+  format: ${LOG_FORMAT:-json}  # json | console
+  include_timestamp: true
+  include_caller: true
+
+# === API ===
+api:
+  host: ${API_HOST:-0.0.0.0}
+  port: ${API_PORT:-8000}
+  reload: ${API_RELOAD:-false}
+  workers: ${API_WORKERS:-1}
+  cors:
+    allow_origins: ["*"]
+    allow_methods: ["*"]
+    allow_headers: ["*"]
+  rate_limit:
+    requests_per_minute: 60
+    burst: 10

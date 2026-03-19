@@ -1,0 +1,538 @@
+{
+  "metadata": {
+    "source_doc": "IRF20251211_last_FF.docx",
+    "version": "1.0",
+    "created_at": "2026-03-18",
+    "n_questions": 50,
+    "description": "Golden dataset pour l'évaluation du RAG GRI/FAR"
+  },
+  "questions": [
+    {
+      "id": "DEF_001",
+      "query": "Qu'est-ce qu'un artefact selon le GRI ?",
+      "ground_truth": "Produit ou livrable élaboré et utilisé au cours d'un projet pour capter et transmettre de l'information. (Artifact: Work product that is produced and used during a project to capture and convey information.) [ISO/IEC/IEEE 15288:2023]",
+      "expected_intent": "DEFINITION",
+      "expected_cycle": "GRI",
+      "required_sources": ["definition"],
+      "difficulty": "easy",
+      "evaluation_focus": "term_accuracy"
+    },
+    {
+      "id": "DEF_002",
+      "query": "Définition de CONOPS dans le GRI",
+      "ground_truth": "Concept d'opérations - Description de la manière dont un système sera utilisé dans son environnement opérationnel.",
+      "expected_intent": "DEFINITION",
+      "expected_cycle": "GRI",
+      "required_sources": ["definition"],
+      "difficulty": "easy",
+      "evaluation_focus": "term_accuracy"
+    },
+    {
+      "id": "DEF_003",
+      "query": "Qu'est-ce que le SEMP selon le GRI ?",
+      "ground_truth": "Plan de Management de l'Ingénierie Système - Document décrivant l'organisation, les processus et les méthodes de l'ingénierie système pour un projet.",
+      "expected_intent": "DEFINITION",
+      "expected_cycle": "GRI",
+      "required_sources": ["definition"],
+      "difficulty": "easy",
+      "evaluation_focus": "term_accuracy"
+    },
+    {
+      "id": "DEF_004",
+      "query": "Définition du TRL selon le GRI",
+      "ground_truth": "Technology Readiness Level - Niveau de maturité technologique permettant d'évaluer le degré de développement d'une technologie.",
+      "expected_intent": "DEFINITION",
+      "expected_cycle": "GRI",
+      "required_sources": ["definition"],
+      "difficulty": "easy",
+      "evaluation_focus": "term_accuracy"
+    },
+    {
+      "id": "DEF_005",
+      "query": "Qu'est-ce qu'un jalon décisionnel dans le GRI ?",
+      "ground_truth": "Point de décision dans le cycle de vie d'un projet où l'autorité compétente évalue la maturité du projet et décide de la poursuite.",
+      "expected_intent": "DEFINITION",
+      "expected_cycle": "GRI",
+      "required_sources": ["definition"],
+      "difficulty": "easy",
+      "evaluation_focus": "term_accuracy"
+    },
+    {
+      "id": "DEF_006",
+      "query": "Définir la vérification selon le GRI",
+      "ground_truth": "Confirmation, par des preuves tangibles, que les exigences spécifiées ont été satisfaites. [ISO/IEC/IEEE 15288:2023]",
+      "expected_intent": "DEFINITION",
+      "expected_cycle": "GRI",
+      "required_sources": ["definition"],
+      "difficulty": "easy",
+      "evaluation_focus": "term_accuracy"
+    },
+    {
+      "id": "DEF_007",
+      "query": "Qu'est-ce que la validation selon le GRI ?",
+      "ground_truth": "Confirmation, par des preuves tangibles, que les exigences pour une utilisation spécifique prévue ou une application ont été satisfaites. [ISO/IEC/IEEE 15288:2023]",
+      "expected_intent": "DEFINITION",
+      "expected_cycle": "GRI",
+      "required_sources": ["definition"],
+      "difficulty": "easy",
+      "evaluation_focus": "term_accuracy"
+    },
+    {
+      "id": "DEF_008",
+      "query": "Définition des parties prenantes selon le GRI",
+      "ground_truth": "Individu ou organisation ayant un droit, une part, une revendication ou un intérêt dans un système ou dans ses caractéristiques répondant à leurs besoins et attentes. [ISO/IEC/IEEE 15288:2023]",
+      "expected_intent": "DEFINITION",
+      "expected_cycle": "GRI",
+      "required_sources": ["definition"],
+      "difficulty": "easy",
+      "evaluation_focus": "term_accuracy"
+    },
+    {
+      "id": "DEF_009",
+      "query": "Qu'est-ce que l'architecture système selon le GRI ?",
+      "ground_truth": "Concepts ou propriétés fondamentaux d'un système dans son environnement, incarnés dans ses éléments, ses relations, et les principes de sa conception et de son évolution. [ISO/IEC/IEEE 15288:2023]",
+      "expected_intent": "DEFINITION",
+      "expected_cycle": "GRI",
+      "required_sources": ["definition"],
+      "difficulty": "easy",
+      "evaluation_focus": "term_accuracy"
+    },
+    {
+      "id": "DEF_010",
+      "query": "Définition de la traçabilité selon le GRI",
+      "ground_truth": "Propriété d'un enregistrement de pouvoir être relié à des enregistrements associés par des relations définies. Permet de suivre l'évolution des exigences et leur implémentation.",
+      "expected_intent": "DEFINITION",
+      "expected_cycle": "GRI",
+      "required_sources": ["definition"],
+      "difficulty": "easy",
+      "evaluation_focus": "term_accuracy"
+    },
+    {
+      "id": "PROC_001",
+      "query": "Quelles sont les activités du processus de vérification selon le GRI ?",
+      "ground_truth": "Le processus de vérification comprend la planification de la vérification, la préparation des vérifications, l'exécution des vérifications et l'analyse des résultats de vérification.",
+      "expected_intent": "PROCESSUS",
+      "expected_cycle": "GRI",
+      "required_sources": ["process"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PROC_002",
+      "query": "Quels sont les inputs et outputs du processus de validation ?",
+      "ground_truth": "Inputs: Exigences parties prenantes, système validable. Outputs: Rapports de validation, preuves de conformité aux besoins opérationnels.",
+      "expected_intent": "PROCESSUS",
+      "expected_cycle": "GRI",
+      "required_sources": ["process"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PROC_003",
+      "query": "Décris le processus d'intégration système selon le GRI",
+      "ground_truth": "Processus visant à assembler les éléments du système conformément à l'architecture système et à vérifier que les interfaces fonctionnent correctement.",
+      "expected_intent": "PROCESSUS",
+      "expected_cycle": "GRI",
+      "required_sources": ["process"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PROC_004",
+      "query": "Activités du processus de définition de l'architecture selon le GRI",
+      "ground_truth": "Analyse des exigences, définition des vues architecturales, allocation des exigences aux éléments, définition des interfaces.",
+      "expected_intent": "PROCESSUS",
+      "expected_cycle": "GRI",
+      "required_sources": ["process"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PROC_005",
+      "query": "Quels sont les processus techniques du GRI selon IS 15288 ?",
+      "ground_truth": "Les processus techniques incluent : Définition des besoins, Définition des exigences, Architecture, Conception, Intégration, Vérification, Validation, Transition, Exploitation, Maintenance, Retrait.",
+      "expected_intent": "PROCESSUS",
+      "expected_cycle": "GRI",
+      "required_sources": ["process"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PROC_006",
+      "query": "Décris le processus de gestion des exigences selon le GRI",
+      "ground_truth": "Processus permettant de capturer, analyser, tracer et gérer les exigences tout au long du cycle de vie du système.",
+      "expected_intent": "PROCESSUS",
+      "expected_cycle": "GRI",
+      "required_sources": ["process"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PROC_007",
+      "query": "Quelles sont les activités du processus de conception selon le GRI ?",
+      "ground_truth": "Transformation des exigences en solutions de conception, définition des interfaces internes, élaboration des spécifications de composants.",
+      "expected_intent": "PROCESSUS",
+      "expected_cycle": "GRI",
+      "required_sources": ["process"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PROC_008",
+      "query": "Décris le processus de transition selon le GRI",
+      "ground_truth": "Processus visant à transférer le système vers l'environnement opérationnel, incluant la formation, la documentation et le support initial.",
+      "expected_intent": "PROCESSUS",
+      "expected_cycle": "GRI",
+      "required_sources": ["process"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PROC_009",
+      "query": "Activités du processus de gestion de la configuration selon le GRI",
+      "ground_truth": "Identification, maîtrise, comptabilité de l'état et audit de la configuration des éléments du système.",
+      "expected_intent": "PROCESSUS",
+      "expected_cycle": "GRI",
+      "required_sources": ["process"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PROC_010",
+      "query": "Décris le processus d'analyse des besoins selon le GRI",
+      "ground_truth": "Identification et analyse des besoins des parties prenantes pour définir les exigences système de haut niveau.",
+      "expected_intent": "PROCESSUS",
+      "expected_cycle": "GRI",
+      "required_sources": ["process"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "JAL_001",
+      "query": "Quels sont les critères de passage du CDR (M4) ?",
+      "ground_truth": "Les critères du CDR (M4) incluent : conception détaillée complète et validée, interfaces définies, risques techniques maîtrisés, plan de production établi, revues de conception validées.",
+      "expected_intent": "JALON",
+      "expected_cycle": "GRI",
+      "required_milestone": "M4",
+      "required_sources": ["milestone"],
+      "difficulty": "medium",
+      "evaluation_focus": "faithfulness",
+      "critical_check": "all_criteria_listed"
+    },
+    {
+      "id": "JAL_002",
+      "query": "Critères de passage du jalon J3 du CIR",
+      "ground_truth": "J3 équivaut à M5 (IRR) + M6 (TRR) du GRI. Critères : intégration réalisée, tests système réussis, documentation de transition prête.",
+      "expected_intent": "JALON",
+      "expected_cycle": "CIR",
+      "required_milestone": "J3",
+      "required_sources": ["milestone"],
+      "difficulty": "medium",
+      "evaluation_focus": "faithfulness",
+      "critical_check": "includes_gri_mapping"
+    },
+    {
+      "id": "JAL_003",
+      "query": "Quels sont les critères du SRR (M2) ?",
+      "ground_truth": "Critères du SRR (M2) : exigences système définies et validées, cohérence des exigences vérifiée, traçabilité établie, revue des exigences réalisée.",
+      "expected_intent": "JALON",
+      "expected_cycle": "GRI",
+      "required_milestone": "M2",
+      "required_sources": ["milestone"],
+      "difficulty": "medium",
+      "evaluation_focus": "faithfulness",
+      "critical_check": "all_criteria_listed"
+    },
+    {
+      "id": "JAL_004",
+      "query": "Critères de passage du PDR (M3)",
+      "ground_truth": "Critères du PDR (M3) : architecture système définie, exigences allouées aux sous-systèmes, interfaces identifiées, risques analysés.",
+      "expected_intent": "JALON",
+      "expected_cycle": "GRI",
+      "required_milestone": "M3",
+      "required_sources": ["milestone"],
+      "difficulty": "medium",
+      "evaluation_focus": "faithfulness",
+      "critical_check": "all_criteria_listed"
+    },
+    {
+      "id": "JAL_005",
+      "query": "Quels sont les critères du jalon M0 ?",
+      "ground_truth": "Critères du M0 : besoin opérationnel identifié, étude d'opportunité réalisée, objectifs définis, ressources estimées.",
+      "expected_intent": "JALON",
+      "expected_cycle": "GRI",
+      "required_milestone": "M0",
+      "required_sources": ["milestone"],
+      "difficulty": "medium",
+      "evaluation_focus": "faithfulness",
+      "critical_check": "all_criteria_listed"
+    },
+    {
+      "id": "JAL_006",
+      "query": "Critères de passage de l'IRR (M5)",
+      "ground_truth": "Critères de l'IRR (M5) : intégration système réalisée, vérifications d'intégration réussies, anomalies traitées, système prêt pour qualification.",
+      "expected_intent": "JALON",
+      "expected_cycle": "GRI",
+      "required_milestone": "M5",
+      "required_sources": ["milestone"],
+      "difficulty": "medium",
+      "evaluation_focus": "faithfulness",
+      "critical_check": "all_criteria_listed"
+    },
+    {
+      "id": "JAL_007",
+      "query": "Quels sont les critères du TRR (M6) ?",
+      "ground_truth": "Critères du TRR (M6) : tests de qualification réussis, documentation de transition complète, formation des utilisateurs prête, support opérationnel établi.",
+      "expected_intent": "JALON",
+      "expected_cycle": "GRI",
+      "required_milestone": "M6",
+      "required_sources": ["milestone"],
+      "difficulty": "medium",
+      "evaluation_focus": "faithfulness",
+      "critical_check": "all_criteria_listed"
+    },
+    {
+      "id": "JAL_008",
+      "query": "Critères de passage du jalon J1 du CIR",
+      "ground_truth": "J1 équivaut à M0 + M1 du GRI. Critères : concept validé, faisabilité démontrée, ressources identifiées.",
+      "expected_intent": "JALON",
+      "expected_cycle": "CIR",
+      "required_milestone": "J1",
+      "required_sources": ["milestone"],
+      "difficulty": "medium",
+      "evaluation_focus": "faithfulness",
+      "critical_check": "includes_gri_mapping"
+    },
+    {
+      "id": "JAL_009",
+      "query": "Quels sont les critères du jalon J2 du CIR ?",
+      "ground_truth": "J2 équivaut à M2 + M3 + M4 du GRI. Critères : exigences et architecture validées, conception détaillée approuvée.",
+      "expected_intent": "JALON",
+      "expected_cycle": "CIR",
+      "required_milestone": "J2",
+      "required_sources": ["milestone"],
+      "difficulty": "medium",
+      "evaluation_focus": "faithfulness",
+      "critical_check": "includes_gri_mapping"
+    },
+    {
+      "id": "JAL_010",
+      "query": "Critères de passage du SAR (M7)",
+      "ground_truth": "Critères du SAR (M7) : système accepté par l'utilisateur, validation opérationnelle réussie, documentation finale livrée.",
+      "expected_intent": "JALON",
+      "expected_cycle": "GRI",
+      "required_milestone": "M7",
+      "required_sources": ["milestone"],
+      "difficulty": "medium",
+      "evaluation_focus": "faithfulness",
+      "critical_check": "all_criteria_listed"
+    },
+    {
+      "id": "PHA_001",
+      "query": "Quels sont les objectifs de la Phase 1 — Idéation du GRI ?",
+      "ground_truth": "Phase 1 - Idéation : identifier et formaliser le besoin opérationnel, réaliser l'étude d'opportunité, définir les objectifs du projet.",
+      "expected_intent": "PHASE_COMPLETE",
+      "expected_cycle": "GRI",
+      "required_phase": 1,
+      "required_sources": ["phase"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PHA_002",
+      "query": "Décris la Phase 2 — Faisabilité du GRI",
+      "ground_truth": "Phase 2 - Faisabilité : étudier les solutions possibles, analyser la faisabilité technique et économique, définir les exigences préliminaires.",
+      "expected_intent": "PHASE_COMPLETE",
+      "expected_cycle": "GRI",
+      "required_phase": 2,
+      "required_sources": ["phase"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PHA_003",
+      "query": "Quels sont les objectifs et livrables de la Phase 3 ?",
+      "ground_truth": "Phase 3 - Conception et Développement : concevoir l'architecture et le détail du système, développer et intégrer les sous-systèmes. Livrables : dossier de conception, prototypes, spécifications.",
+      "expected_intent": "PHASE_COMPLETE",
+      "expected_cycle": "GRI",
+      "required_phase": 3,
+      "required_sources": ["phase"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PHA_004",
+      "query": "Décris la Phase 4 — Production du GRI",
+      "ground_truth": "Phase 4 - Production : produire le système en série, réaliser les tests de production, préparer le déploiement.",
+      "expected_intent": "PHASE_COMPLETE",
+      "expected_cycle": "GRI",
+      "required_phase": 4,
+      "required_sources": ["phase"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PHA_005",
+      "query": "Quels sont les objectifs de la Phase 5 — Déploiement ?",
+      "ground_truth": "Phase 5 - Déploiement : déployer le système dans l'environnement opérationnel, former les utilisateurs, assurer la transition vers l'exploitation.",
+      "expected_intent": "PHASE_COMPLETE",
+      "expected_cycle": "GRI",
+      "required_phase": 5,
+      "required_sources": ["phase"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PHA_006",
+      "query": "Décris la Phase 6 — Exploitation et Maintien en Condition Opérationnelle",
+      "ground_truth": "Phase 6 - Exploitation et MCO : exploiter le système, assurer sa maintenance, gérer les évolutions et les obsolescences.",
+      "expected_intent": "PHASE_COMPLETE",
+      "expected_cycle": "GRI",
+      "required_phase": 6,
+      "required_sources": ["phase"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PHA_007",
+      "query": "Objectifs de la Phase 7 — Retrait du GRI",
+      "ground_truth": "Phase 7 - Retrait : retirer le système du service, gérer la fin de vie, assurer le transfert ou la destruction des données et équipements.",
+      "expected_intent": "PHASE_COMPLETE",
+      "expected_cycle": "GRI",
+      "required_phase": 7,
+      "required_sources": ["phase"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "PHA_008",
+      "query": "Quelles sont les phases du CIR et leurs objectifs ?",
+      "ground_truth": "Le CIR comprend 4 phases : Phase 1 (Exploration), Phase 2 (Expérimentation), Phase 3 (Démonstration), Phase 4 (Industrialisation). Cycle accéléré pour l'innovation rapide.",
+      "expected_intent": "PHASE_COMPLETE",
+      "expected_cycle": "CIR",
+      "required_sources": ["phase", "cir"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "COMP_001",
+      "query": "Quelle est la différence entre le GRI standard et le CIR ?",
+      "ground_truth": "GRI standard : 7 phases, jalons M0-M9, cycle complet pour projets majeurs. CIR : 4 phases, jalons J1-J6, cycle accéléré pour innovation rapide. Le CIR permet de réduire le temps de développement tout en maintenant la rigueur du GRI.",
+      "expected_intent": "COMPARAISON",
+      "expected_cycle": "BOTH",
+      "required_sources": ["phase", "cir"],
+      "difficulty": "hard",
+      "evaluation_focus": "answer_relevance"
+    },
+    {
+      "id": "COMP_002",
+      "query": "Comparer l'approche séquentielle et l'approche DevSecOps selon le GRI",
+      "ground_truth": "Approche séquentielle : phases distinctes, jalons formels, adapté aux projets à contraintes fortes. DevSecOps : intégration continue, sécurité intégrée, itérations rapides, adapté aux projets logiciels.",
+      "expected_intent": "COMPARAISON",
+      "expected_cycle": "GRI",
+      "required_sources": ["approach"],
+      "difficulty": "hard",
+      "evaluation_focus": "answer_relevance"
+    },
+    {
+      "id": "COMP_003",
+      "query": "Différence entre vérification et validation selon le GRI",
+      "ground_truth": "Vérification : confirme que le système est construit correctement (conforme aux exigences). Validation : confirme que le bon système est construit (répond aux besoins opérationnels).",
+      "expected_intent": "COMPARAISON",
+      "expected_cycle": "GRI",
+      "required_sources": ["definition"],
+      "difficulty": "medium",
+      "evaluation_focus": "term_accuracy"
+    },
+    {
+      "id": "COMP_004",
+      "query": "Comparer les jalons M5 (IRR) et M6 (TRR)",
+      "ground_truth": "M5 (IRR) : revue d'intégration, vérifie l'assemblage du système. M6 (TRR) : revue de qualification, vérifie la maturité pour le transfert opérationnel.",
+      "expected_intent": "COMPARAISON",
+      "expected_cycle": "GRI",
+      "required_sources": ["milestone"],
+      "difficulty": "medium",
+      "evaluation_focus": "faithfulness"
+    },
+    {
+      "id": "COMP_005",
+      "query": "Différence entre TRL et MRL selon le GRI",
+      "ground_truth": "TRL (Technology Readiness Level) : maturité technologique. MRL (Manufacturing Readiness Level) : maturité de production. Les deux échelles sont complémentaires pour évaluer la maturité globale.",
+      "expected_intent": "COMPARAISON",
+      "expected_cycle": "GRI",
+      "required_sources": ["definition"],
+      "difficulty": "medium",
+      "evaluation_focus": "term_accuracy"
+    },
+    {
+      "id": "COMP_006",
+      "query": "Comparer les principes 1 et 2 du GRI",
+      "ground_truth": "Principe 1 : Approche système globale. Principe 2 : Prise en compte du cycle de vie complet. Les deux principes sont fondamentaux pour une vision holistique du projet.",
+      "expected_intent": "COMPARAISON",
+      "expected_cycle": "GRI",
+      "required_sources": ["principle"],
+      "difficulty": "hard",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "COMP_007",
+      "query": "Différence entre les processus d'accord et les processus techniques selon le GRI",
+      "ground_truth": "Processus d'accord : acquisition, fourniture, relations contractuelles. Processus techniques : définition, conception, intégration, vérification, validation. Les premiers gèrent les aspects contractuels, les seconds les aspects techniques.",
+      "expected_intent": "COMPARAISON",
+      "expected_cycle": "GRI",
+      "required_sources": ["process"],
+      "difficulty": "hard",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "CIR_001",
+      "query": "Dans quel contexte le CIR s'applique-t-il selon le GRI ?",
+      "ground_truth": "Le CIR s'applique aux projets d'innovation rapide nécessitant un cycle de développement accéléré, typiquement pour des technologies émergentes ou des besoins urgents.",
+      "expected_intent": "CIR",
+      "expected_cycle": "CIR",
+      "required_sources": ["cir"],
+      "difficulty": "easy",
+      "evaluation_focus": "answer_relevance"
+    },
+    {
+      "id": "CIR_002",
+      "query": "Quel est le mapping entre les jalons CIR et les jalons GRI ?",
+      "ground_truth": "J1 = M0 + M1, J2 = M2 + M3 + M4, J3 = M5 + M6, J4 = SAR (partiel), J5 = SAR (partiel), J6 = M8. Le CIR compresse les jalons du GRI pour accélérer le cycle.",
+      "expected_intent": "CIR",
+      "expected_cycle": "CIR",
+      "required_sources": ["cir", "milestone"],
+      "difficulty": "medium",
+      "evaluation_focus": "faithfulness"
+    },
+    {
+      "id": "CIR_003",
+      "query": "Quels sont les risques spécifiques au CIR ?",
+      "ground_truth": "Risques CIR : maturité technologique insuffisante, dette technique, manque de documentation, difficultés d'industrialisation, transition vers le GRI standard.",
+      "expected_intent": "CIR",
+      "expected_cycle": "CIR",
+      "required_sources": ["cir"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "CIR_004",
+      "query": "Comment se fait la transition du CIR vers le GRI standard ?",
+      "ground_truth": "La transition CIR vers GRI nécessite une évaluation de maturité, une documentation complète, et potentiellement des activités de consolidation pour atteindre les exigences du GRI standard.",
+      "expected_intent": "CIR",
+      "expected_cycle": "CIR",
+      "required_sources": ["cir"],
+      "difficulty": "hard",
+      "evaluation_focus": "context_recall"
+    },
+    {
+      "id": "CIR_005",
+      "query": "Quels sont les livrables spécifiques au CIR ?",
+      "ground_truth": "Livrables CIR : prototype fonctionnel, documentation allégée, dossier de maturité, rapport d'évaluation, plan de transition vers GRI si applicable.",
+      "expected_intent": "CIR",
+      "expected_cycle": "CIR",
+      "required_sources": ["cir"],
+      "difficulty": "medium",
+      "evaluation_focus": "context_recall"
+    }
+  ]
+}
