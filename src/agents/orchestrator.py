@@ -23,13 +23,13 @@ import structlog
 from huggingface_hub import AsyncInferenceClient
 from pydantic import BaseModel, Field
 
-from src.agents.query_router import GRIQueryRouter, RoutingResult
+from src.agents.query_router import GRIQueryRouter
 from src.core.config import settings
 from src.core.memory import GRIMemory
 from src.core.term_expander import GRITermExpander
 from src.core.vector_store import GRIHybridStore
-from src.generation import GRIGenerator, GRIResponseType, intent_to_response_type
-from src.tools import TOOLS, execute_tool, format_tool_result_for_llm
+from src.generation import GRIGenerator
+from src.tools import TOOLS, format_tool_result_for_llm
 from src.tools.executor import ToolResult
 
 log = structlog.get_logger()
@@ -283,7 +283,7 @@ class GRIOrchestrator:
             tool_results = await self._execute_tools(tool_calls)
 
             # Ajouter à l'historique et collecter les chunks
-            for tc, result in zip(tool_calls, tool_results):
+            for tc, result in zip(tool_calls, tool_results, strict=False):
                 tool_calls_history.append({
                     "tool": tc.name,
                     "input": tc.input,
@@ -466,8 +466,6 @@ class GRIOrchestrator:
         Returns:
             Liste de ToolCall validés
         """
-        tool_calls = []
-
         # Stratégie 1 : Format standard avec tool_calls array
         result = self._parse_standard_format(response)
         if result:
@@ -662,7 +660,7 @@ class GRIOrchestrator:
         Returns:
             ToolResult
         """
-        from src.tools.executor import ToolExecutor, ToolResult as TR
+        from src.tools.executor import ToolExecutor
 
         executor = ToolExecutor(self.store)
         return await executor.execute(tool_call.name, tool_call.input)
@@ -683,7 +681,7 @@ class GRIOrchestrator:
         """
         lines = []
 
-        for tc, result in zip(tool_calls, results):
+        for tc, result in zip(tool_calls, results, strict=False):
             lines.append(f"## Résultat de {tc.name}")
             lines.append("")
             lines.append(format_tool_result_for_llm(result))
@@ -771,13 +769,12 @@ class GRIOrchestrator:
             })
 
         # compare_approaches : convertir en chunk
-        elif tool_name == "compare_approaches":
-            if data.get("comparison_text"):
-                chunks.append({
-                    "content": data["comparison_text"],
-                    "section_type": "comparison",
-                    "score": 1.0,
-                })
+        elif tool_name == "compare_approaches" and data.get("comparison_text"):
+            chunks.append({
+                "content": data["comparison_text"],
+                "section_type": "comparison",
+                "score": 1.0,
+            })
 
         return chunks
 

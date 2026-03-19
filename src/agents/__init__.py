@@ -24,10 +24,10 @@ from src.agents.orchestrator import (
     run_query,
 )
 from src.agents.query_router import (
+    ROUTING_TABLE,
     GRICycle,
     GRIIntent,
     GRIQueryRouter,
-    ROUTING_TABLE,
     RoutingResult,
     RoutingStrategy,
     get_strategy_for_intent,
