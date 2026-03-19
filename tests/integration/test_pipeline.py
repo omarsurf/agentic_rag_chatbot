@@ -6,26 +6,26 @@ Parse DOCX → Tables → Glossaire → Chunking → Validation → Indexation
 Lancer avec: pytest tests/integration/test_pipeline.py -v -m integration
 """
 
-import pytest
 import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.ingestion.pipeline import GRIIngestionPipeline
+import pytest
+
 from src.ingestion.chunker import GRIChunker
+from src.ingestion.glossary_extractor import GRIGlossaryExtractor
 from src.ingestion.models import (
     Cycle,
     GRIChunk,
     GRIMetadata,
+    IngestionResult,
     ParsedSection,
     ParsedTable,
     SectionType,
-    IngestionResult,
 )
 from src.ingestion.parser import GRIDocxParser
+from src.ingestion.pipeline import GRIIngestionPipeline
 from src.ingestion.table_extractor import GRITableExtractor
-from src.ingestion.glossary_extractor import GRIGlossaryExtractor
-
 
 pytestmark = pytest.mark.integration
 

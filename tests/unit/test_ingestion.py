@@ -9,8 +9,8 @@ Tests conformes aux règles définies dans ingestion_skill.md:
 """
 
 import pytest
-from datetime import datetime
 
+from src.ingestion.chunker import GRIChunker
 from src.ingestion.models import (
     CIR_GRI_MAPPING,
     Cycle,
@@ -21,9 +21,7 @@ from src.ingestion.models import (
     ParsedTable,
     SectionType,
 )
-from src.ingestion.chunker import GRIChunker
 from src.ingestion.table_extractor import GRITableExtractor
-
 
 # === Fixtures ===
 
@@ -301,7 +299,7 @@ class TestGRIChunker:
 
         assert len(chunks) == len(sample_glossary_entries)
 
-        for chunk, entry in zip(chunks, sample_glossary_entries):
+        for chunk, entry in zip(chunks, sample_glossary_entries, strict=True):
             assert chunk.metadata.section_type == SectionType.DEFINITION
             assert chunk.metadata.term_fr == entry.term_fr
             assert chunk.metadata.term_en == entry.term_en
@@ -326,7 +324,7 @@ class TestGRIChunker:
         if len(sample_phase_section.content) > 1500:
             assert len(child_chunks) >= 1
             # Tous les enfants doivent référencer le même parent
-            parent_ids = set(c.metadata.parent_chunk_id for c in child_chunks)
+            parent_ids = {c.metadata.parent_chunk_id for c in child_chunks}
             assert len(parent_ids) == 1
 
     def test_no_empty_chunks(self, chunker: GRIChunker):
@@ -547,7 +545,6 @@ class TestMilestoneCoverage:
 
     def test_all_gri_milestones_defined(self):
         """Tous les jalons GRI (M0-M9) sont définis."""
-        expected = {f"M{i}" for i in range(10)}
         # Vérifier que le mapping CIR couvre bien les jalons GRI
         gri_covered = set()
         for gri_list in CIR_GRI_MAPPING.values():
@@ -574,11 +571,11 @@ class TestSlowIngestion:
 
     def test_full_ingestion_pipeline(self):
         """Test complet du pipeline avec le vrai document ou mock."""
-        import os
         from pathlib import Path
-        from unittest.mock import MagicMock, patch
+        from unittest.mock import patch
+
+        from src.ingestion.models import IngestionResult
         from src.ingestion.pipeline import GRIIngestionPipeline
-        from src.ingestion.models import IngestionResult, ParsedSection, SectionType
 
         # Vérifier si le document réel existe
         real_doc = Path("data/raw/IRF20251211_last_FF.docx")
@@ -595,24 +592,6 @@ class TestSlowIngestion:
             assert len(result.errors) == 0
         else:
             # Test avec mock si le document n'existe pas
-            mock_sections = [
-                ParsedSection(
-                    title="Glossaire",
-                    level=1,
-                    content="artefact : Produit d'ingénierie",
-                    section_type=SectionType.DEFINITION,
-                    hierarchy=["GRI", "Glossaire"],
-                ),
-                ParsedSection(
-                    title="Jalon M4 - CDR",
-                    level=2,
-                    content="Critères du CDR",
-                    section_type=SectionType.MILESTONE,
-                    hierarchy=["GRI", "Phase 3", "Jalon M4"],
-                    metadata={"milestone_id": "M4"},
-                ),
-            ]
-
             with patch.object(
                 GRIIngestionPipeline,
                 "run",

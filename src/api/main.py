@@ -15,7 +15,7 @@ Usage:
 import asyncio
 import time
 import uuid
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from datetime import datetime
 
 import structlog
@@ -110,6 +110,7 @@ async def _cleanup_expired_sessions() -> None:
 async def lifespan(app_instance: FastAPI):
     """Gestion du cycle de vie de l'application."""
     global _store, _session_store, _cleanup_task
+    _ = app_instance
 
     log.info("api.startup", port=settings.api_port, auth_required=is_auth_required())
 
@@ -141,10 +142,8 @@ async def lifespan(app_instance: FastAPI):
     log.info("api.shutdown")
     if _cleanup_task:
         _cleanup_task.cancel()
-        try:
+        with suppress(asyncio.CancelledError):
             await _cleanup_task
-        except asyncio.CancelledError:
-            pass
     if _store is not None:
         _store.close()
     _store = None
@@ -392,6 +391,7 @@ async def query(
         QueryResponse avec la réponse et les sources
     """
     global _query_count, _total_latency
+    _ = request
 
     store = get_store()
     memory = await get_or_create_memory(query_request.session_id)
@@ -496,6 +496,7 @@ async def query_stream(
     Returns:
         EventSourceResponse (SSE stream)
     """
+    _ = request
     store = get_store()
     memory = await get_or_create_memory(query_request.session_id)
 
@@ -576,6 +577,7 @@ async def get_feedback_statistics(
     Returns:
         Statistiques de feedback
     """
+    _ = request
     from src.core.feedback_store import get_feedback_stats
 
     stats = await get_feedback_stats()
@@ -599,6 +601,7 @@ async def clear_session(
     Returns:
         Message de confirmation
     """
+    _ = request
     if _session_store is not None and await _session_store.delete_session(session_id):
         log.info("api.session_cleared", session_id=session_id)
         return {"message": f"Session {session_id} cleared"}

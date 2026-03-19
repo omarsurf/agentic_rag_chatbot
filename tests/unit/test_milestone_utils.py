@@ -11,10 +11,10 @@ Vérifie:
 import pytest
 
 from src.core.milestone_utils import (
+    ACRONYM_PATTERN,
+    MILESTONE_PATTERN,
     extract_milestone_id,
     normalize_milestone_id,
-    MILESTONE_PATTERN,
-    ACRONYM_PATTERN,
 )
 
 

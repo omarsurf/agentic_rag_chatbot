@@ -255,14 +255,14 @@ class GRIDocxParser:
         self._current_levels[level] = title
 
         # Supprimer les niveaux inférieurs
-        levels_to_remove = [l for l in self._current_levels if l > level]
-        for l in levels_to_remove:
-            del self._current_levels[l]
+        levels_to_remove = [level_key for level_key in self._current_levels if level_key > level]
+        for level_key in levels_to_remove:
+            del self._current_levels[level_key]
 
         # Reconstruire la hiérarchie
         self._current_hierarchy = ["GRI"]
-        for l in sorted(self._current_levels.keys()):
-            self._current_hierarchy.append(self._current_levels[l])
+        for level_key in sorted(self._current_levels.keys()):
+            self._current_hierarchy.append(self._current_levels[level_key])
 
     def _detect_section_type(self, text: str) -> SectionType:
         """Détecte le type de section depuis le titre."""
@@ -295,7 +295,7 @@ class GRIDocxParser:
         self,
         table_index: int,
         sections: list[ParsedSection],
-        doc: Document,
+        _doc: Document,
     ) -> ParsedSection | None:
         """Trouve la section parente d'une table."""
         # Approximation: on utilise l'index de la table

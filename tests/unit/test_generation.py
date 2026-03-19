@@ -30,7 +30,6 @@ from src.generation.prompts import (
     intent_to_response_type,
 )
 
-
 # === Tests des prompts ===
 
 
@@ -434,8 +433,9 @@ Le CDR (Critical Design Review) valide la conception détaillée du système.
     @pytest.mark.asyncio
     async def test_generate_definition(self, mock_llm_response_definition):
         """Test génération d'une définition avec mock."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
         from src.generation import GRIGenerator
-        from unittest.mock import AsyncMock, patch, MagicMock
 
         chunks = [
             {
@@ -466,8 +466,9 @@ Le CDR (Critical Design Review) valide la conception détaillée du système.
     @pytest.mark.asyncio
     async def test_generate_milestone_criteria(self, mock_llm_response_milestone):
         """Test génération de critères de jalon avec mock."""
+        from unittest.mock import AsyncMock, MagicMock, patch
+
         from src.generation import GRIGenerator
-        from unittest.mock import AsyncMock, patch, MagicMock
 
         with patch("src.generation.generator.AsyncInferenceClient") as MockClient:
             mock_client = MagicMock()

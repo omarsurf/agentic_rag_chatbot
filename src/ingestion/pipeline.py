@@ -12,16 +12,12 @@ import hashlib
 import time
 from pathlib import Path
 
-from src.core.config import settings
 from src.core.logging import get_logger
 from src.ingestion.chunker import GRIChunker
 from src.ingestion.glossary_extractor import GRIGlossaryExtractor
 from src.ingestion.models import (
     GRIChunk,
     IngestionResult,
-    ParsedSection,
-    ParsedTable,
-    SectionType,
 )
 from src.ingestion.parser import GRIDocxParser
 from src.ingestion.table_extractor import GRITableExtractor
@@ -316,7 +312,6 @@ class GRIIngestionPipeline:
 def main() -> None:
     """Point d'entrée CLI pour l'ingestion."""
     import argparse
-    import json
 
     parser = argparse.ArgumentParser(
         description="Pipeline d'ingestion GRI",

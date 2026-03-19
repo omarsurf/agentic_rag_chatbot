@@ -14,22 +14,15 @@ Exécution:
 
 import json
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
 
 from src.evaluation.faithfulness_gri import (
     FaithfulnessResult,
     _detect_gri_errors,
-    compute_faithfulness_gri,
 )
 from src.evaluation.metrics import (
     AnswerRelevanceResult,
     ContextPrecisionResult,
     ContextRecallResult,
-    compute_answer_relevance,
-    compute_context_precision,
-    compute_context_recall,
 )
 from src.evaluation.pipeline import (
     EvaluationSummary,
@@ -40,7 +33,6 @@ from src.evaluation.pipeline import (
 from src.evaluation.term_accuracy import (
     TermAccuracyResult,
     _calculate_score,
-    compute_term_accuracy,
     extract_iso_terms,
 )
 

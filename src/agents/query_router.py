@@ -21,7 +21,7 @@ Usage:
 
 import json
 import re
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Literal
 
 import structlog
@@ -33,7 +33,7 @@ from src.core.config import settings
 log = structlog.get_logger()
 
 
-class GRIIntent(str, Enum):
+class GRIIntent(StrEnum):
     """Les 6 intents GRI pour le routing des queries."""
 
     DEFINITION = "DEFINITION"
@@ -44,7 +44,7 @@ class GRIIntent(str, Enum):
     CIR = "CIR"
 
 
-class GRICycle(str, Enum):
+class GRICycle(StrEnum):
     """Cycle GRI standard ou CIR."""
 
     GRI = "GRI"

@@ -12,8 +12,7 @@ Exécution:
 """
 
 import time
-from statistics import mean, stdev
-from unittest.mock import AsyncMock, MagicMock, patch
+from statistics import mean
 
 import pytest
 
@@ -26,6 +25,7 @@ class TestAPILatency:
     @pytest.fixture
     def client(self):
         from fastapi.testclient import TestClient
+
         from src.api.main import app
         return TestClient(app)
 
@@ -85,12 +85,11 @@ class TestComponentLatency:
         """Le query router répond en < 500ms (mocké)."""
         from src.agents.query_router import GRIQueryRouter
 
-        router = GRIQueryRouter()
+        GRIQueryRouter()
 
         # Mesurer le temps de la logique de base (sans appel LLM)
         start = time.time()
         # Test de la détection de patterns (pas d'appel async)
-        query = "Qu'est-ce qu'un artefact ?"
         # La détection de patterns est synchrone
         latency = (time.time() - start) * 1000
 
@@ -132,7 +131,7 @@ class TestComponentLatency:
 
         for _ in range(100):
             start = time.time()
-            errors = _detect_gri_errors(text)
+            _detect_gri_errors(text)
             latency = (time.time() - start) * 1000
             latencies.append(latency)
 
@@ -183,7 +182,7 @@ class TestMemoryOperations:
 
         for _ in range(100):
             start = time.time()
-            context = memory.get_context()
+            memory.get_context()
             latency = (time.time() - start) * 1000
             latencies.append(latency)
 
@@ -202,7 +201,7 @@ class TestDataModelLatency:
 
         for i in range(100):
             start = time.time()
-            request = QueryRequest(
+            QueryRequest(
                 query=f"Question test numéro {i}",
                 cycle="AUTO",
                 include_sources=True,
@@ -216,14 +215,14 @@ class TestDataModelLatency:
 
     def test_response_model_creation_latency(self):
         """La création de QueryResponse répond en < 5ms."""
-        from src.api.models import QueryResponse, Citation
-        from datetime import datetime
+
+        from src.api.models import Citation, QueryResponse
 
         latencies = []
 
         for i in range(100):
             start = time.time()
-            response = QueryResponse(
+            QueryResponse(
                 query_id=f"test-{i}",
                 answer="Réponse test" * 100,
                 intent="JALON",
@@ -247,7 +246,7 @@ class TestEvaluationLatency:
 
     def test_score_calculation_latency(self):
         """Le calcul de score répond en < 1ms."""
-        from src.evaluation.term_accuracy import _calculate_score, TermEvaluation
+        from src.evaluation.term_accuracy import TermEvaluation, _calculate_score
 
         evaluations = [
             TermEvaluation(
@@ -264,7 +263,7 @@ class TestEvaluationLatency:
 
         for _ in range(1000):
             start = time.time()
-            score = _calculate_score(evaluations)
+            _calculate_score(evaluations)
             latency = (time.time() - start) * 1000
             latencies.append(latency)
 
@@ -273,7 +272,7 @@ class TestEvaluationLatency:
 
     def test_aggregation_latency(self):
         """L'agrégation des résultats répond en < 50ms."""
-        from src.evaluation.pipeline import GRIEvaluator, GRIEvalResult
+        from src.evaluation.pipeline import GRIEvalResult, GRIEvaluator
 
         evaluator = GRIEvaluator()
 
@@ -299,7 +298,7 @@ class TestEvaluationLatency:
 
         for _ in range(100):
             start = time.time()
-            summary = evaluator._aggregate(results)
+            evaluator._aggregate(results)
             latency = (time.time() - start) * 1000
             latencies.append(latency)
 
@@ -313,6 +312,7 @@ class TestConcurrency:
     @pytest.fixture
     def client(self):
         from fastapi.testclient import TestClient
+
         from src.api.main import app
         return TestClient(app)
 

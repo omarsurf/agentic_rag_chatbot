@@ -11,8 +11,9 @@ Exécution:
 
 import asyncio
 import time
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
 
 pytestmark = pytest.mark.e2e
 
@@ -50,8 +51,8 @@ class TestSessionLifecycle:
 
     def test_session_context_accumulates(self):
         """Le contexte de session s'accumule au fil des tours."""
+        from src.agents.query_router import GRICycle, GRIIntent
         from src.core.memory import GRIMemory
-        from src.agents.query_router import GRIIntent, GRICycle
 
         memory = GRIMemory(session_id="test-accumulate", max_turns=10)
 
@@ -81,8 +82,8 @@ class TestSessionLifecycle:
 
     def test_session_respects_max_turns(self):
         """La session respecte la limite max_turns."""
+        from src.agents.query_router import GRICycle, GRIIntent
         from src.core.memory import GRIMemory
-        from src.agents.query_router import GRIIntent, GRICycle
 
         max_turns = 3
         memory = GRIMemory(session_id="test-max", max_turns=max_turns)
@@ -101,8 +102,8 @@ class TestSessionLifecycle:
 
     def test_session_extracts_context_entities(self):
         """La session extrait les entités contextuelles."""
+        from src.agents.query_router import GRICycle, GRIIntent
         from src.core.memory import GRIMemory
-        from src.agents.query_router import GRIIntent, GRICycle
 
         memory = GRIMemory(session_id="test-entities", max_turns=10)
 
@@ -125,8 +126,8 @@ class TestSessionPersistence:
 
     def test_session_id_is_preserved(self):
         """L'ID de session est préservé entre les tours."""
+        from src.agents.query_router import GRICycle, GRIIntent
         from src.core.memory import GRIMemory
-        from src.agents.query_router import GRIIntent, GRICycle
 
         session_id = "preserve-test-123"
         memory = GRIMemory(session_id=session_id)
@@ -142,8 +143,8 @@ class TestSessionPersistence:
 
     def test_session_metadata_preserved(self):
         """Les métadonnées de session sont préservées."""
+        from src.agents.query_router import GRICycle, GRIIntent
         from src.core.memory import GRIMemory
-        from src.agents.query_router import GRIIntent, GRICycle
 
         memory = GRIMemory(session_id="metadata-test")
 
@@ -167,8 +168,8 @@ class TestSessionCleanup:
 
     def test_memory_clear(self):
         """La mémoire peut être effacée."""
+        from src.agents.query_router import GRICycle, GRIIntent
         from src.core.memory import GRIMemory
-        from src.agents.query_router import GRIIntent, GRICycle
 
         memory = GRIMemory(session_id="clear-test")
 
@@ -231,6 +232,7 @@ class TestSessionAPIIntegration:
     @pytest.fixture
     def client(self):
         from fastapi.testclient import TestClient
+
         from src.api.main import app
         return TestClient(app)
 
@@ -262,11 +264,11 @@ class TestSessionAPIIntegration:
             mock_result.latency_ms = 10.0
             mock_result.warning = None
 
-            def build_orchestrator(*args, **kwargs):
+            def build_orchestrator(*_args, **kwargs):
                 memory = kwargs["memory"]
                 memories.append(memory)
 
-                async def run_side_effect(query):
+                async def run_side_effect(_query):
                     if not memory.turns:
                         memory.add_turn(
                             query="Première question",
@@ -304,8 +306,8 @@ class TestSessionContext:
 
     def test_context_format_for_llm(self):
         """Le contexte est formaté correctement pour le LLM."""
+        from src.agents.query_router import GRICycle, GRIIntent
         from src.core.memory import GRIMemory
-        from src.agents.query_router import GRIIntent, GRICycle
 
         memory = GRIMemory(session_id="format-test")
 
@@ -324,8 +326,8 @@ class TestSessionContext:
 
     def test_context_truncation(self):
         """Le contexte est tronqué si trop long."""
+        from src.agents.query_router import GRICycle, GRIIntent
         from src.core.memory import GRIMemory
-        from src.agents.query_router import GRIIntent, GRICycle
 
         memory = GRIMemory(session_id="truncate-test", max_turns=10)
 
@@ -345,8 +347,8 @@ class TestSessionContext:
 
     def test_context_includes_recent_turns(self):
         """Le contexte inclut les tours récents."""
+        from src.agents.query_router import GRICycle, GRIIntent
         from src.core.memory import GRIMemory
-        from src.agents.query_router import GRIIntent, GRICycle
 
         memory = GRIMemory(session_id="recent-test", max_turns=3)
 
@@ -366,8 +368,8 @@ class TestSessionStatistics:
 
     def test_session_stats(self):
         """Les statistiques de session sont correctes."""
+        from src.agents.query_router import GRICycle, GRIIntent
         from src.core.memory import GRIMemory
-        from src.agents.query_router import GRIIntent, GRICycle
 
         memory = GRIMemory(session_id="stats-test")
 
@@ -391,8 +393,8 @@ class TestSessionStatistics:
 
     def test_intent_distribution(self):
         """La distribution des intents est calculée."""
+        from src.agents.query_router import GRICycle, GRIIntent
         from src.core.memory import GRIMemory
-        from src.agents.query_router import GRIIntent, GRICycle
 
         memory = GRIMemory(session_id="dist-test")
 

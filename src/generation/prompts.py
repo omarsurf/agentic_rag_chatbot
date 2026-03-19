@@ -14,12 +14,12 @@ Usage:
     prompt = get_prompt(GRIResponseType.DEFINITION, term="artefact")
 """
 
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel
 
 
-class GRIResponseType(str, Enum):
+class GRIResponseType(StrEnum):
     """Types de réponses GRI avec contraintes spécifiques."""
 
     DEFINITION = "definition"

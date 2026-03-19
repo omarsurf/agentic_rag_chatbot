@@ -7,16 +7,14 @@ Lancer avec: pytest tests/integration/test_vector_store.py -v -m integration
 Note: Les tests utilisent des collections temporaires qui sont nettoyées après exécution.
 """
 
-import asyncio
+import contextlib
 import hashlib
-from unittest.mock import patch, MagicMock
 
 import numpy as np
 import pytest
 
 from src.core.config import settings
 from src.core.vector_store import GRIHybridStore, SearchResult
-
 
 # Marquer tous les tests comme tests d'intégration
 pytestmark = pytest.mark.integration
@@ -210,10 +208,8 @@ class TestCollectionManagement:
         """ensure_collections crée les collections manquantes."""
         # Supprimer les collections de test si elles existent
         for collection_name in store.COLLECTIONS.values():
-            try:
+            with contextlib.suppress(Exception):
                 store.client.delete_collection(collection_name)
-            except Exception:
-                pass
 
         # Créer les collections
         await store.ensure_collections()

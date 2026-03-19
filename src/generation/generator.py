@@ -35,7 +35,6 @@ from src.generation.context_formatter import (
 from src.generation.postprocessor import (
     add_source_footer,
     clean_response,
-    extract_citations,
     postprocess_gri_answer,
 )
 from src.generation.prompts import (
@@ -121,10 +120,7 @@ class GRIGenerator:
 
         # Déterminer le type de réponse
         if response_type is None:
-            if intent:
-                response_type = intent_to_response_type(intent)
-            else:
-                response_type = GRIResponseType.GENERAL
+            response_type = intent_to_response_type(intent) if intent else GRIResponseType.GENERAL
 
         log.info(
             "generator.generate.start",
@@ -289,6 +285,7 @@ class GRIGenerator:
         Returns:
             Dict avec answer, citations, etc.
         """
+        _ = query
         response_type = GRIResponseType.COMPARISON
         temperature = get_temperature(response_type)
         max_tokens = get_max_tokens(response_type)

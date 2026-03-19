@@ -17,7 +17,6 @@ import hashlib
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Literal
 
-import numpy as np
 import structlog
 from pydantic import BaseModel, Field
 from qdrant_client import AsyncQdrantClient, QdrantClient
@@ -154,7 +153,7 @@ class GRIHybridStore:
 
     async def ensure_collections(self) -> None:
         """Crée les collections Qdrant si elles n'existent pas."""
-        for name, collection_name in self.COLLECTIONS.items():
+        for _name, collection_name in self.COLLECTIONS.items():
             try:
                 if self._async_client:
                     await self._async_client.get_collection(collection_name)
@@ -211,7 +210,7 @@ class GRIHybridStore:
             batch = chunks[i : i + batch_size]
             points = []
 
-            for idx, chunk in enumerate(batch):
+            for _idx, chunk in enumerate(batch):
                 content = chunk.get("content", "")
                 metadata = chunk.get("metadata", {})
 

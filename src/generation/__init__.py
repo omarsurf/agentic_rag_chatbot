@@ -40,9 +40,9 @@ from src.generation.postprocessor import (
     validate_phases,
 )
 from src.generation.prompts import (
-    GRIResponseType,
     MAX_TOKENS_MAP,
     TEMPERATURE_MAP,
+    GRIResponseType,
     get_max_tokens,
     get_prompt,
     get_system_prompt,

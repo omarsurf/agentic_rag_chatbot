@@ -31,12 +31,11 @@ from src.core.config import (
     CIR_GRI_MAPPING,
     MILESTONE_ACRONYM_TO_ID,
     VALID_CIR_MILESTONES,
-    VALID_GRI_MILESTONES,
     VALID_MILESTONES,
 )
 
 if TYPE_CHECKING:
-    from src.core.vector_store import GRIHybridStore, SearchResult
+    from src.core.vector_store import GRIHybridStore
 
 log = structlog.get_logger()
 
@@ -199,7 +198,7 @@ class GRIMilestoneRetriever:
                 ]
                 results = await asyncio.gather(*tasks)
 
-                for gri_id, chunks in zip(gri_equivalents, results):
+                for gri_id, chunks in zip(gri_equivalents, results, strict=False):
                     for chunk in chunks:
                         chunk.role = f"gri_equivalent ({gri_id})"
                         gri_chunks.append(chunk)

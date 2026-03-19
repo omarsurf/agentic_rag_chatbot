@@ -9,7 +9,7 @@ Usage:
 
 import re
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Annotated, Any
 
 from pydantic import AfterValidator, BaseModel, Field
@@ -33,7 +33,7 @@ def validate_session_id(v: str | None) -> str | None:
 SessionId = Annotated[str | None, AfterValidator(validate_session_id)]
 
 
-class CycleType(str, Enum):
+class CycleType(StrEnum):
     """Type de cycle GRI ou CIR."""
 
     GRI = "GRI"
@@ -41,7 +41,7 @@ class CycleType(str, Enum):
     AUTO = "AUTO"
 
 
-class IntentType(str, Enum):
+class IntentType(StrEnum):
     """Intent détecté par le query router."""
 
     DEFINITION = "DEFINITION"
@@ -262,7 +262,7 @@ class ErrorResponse(BaseModel):
 # === SSE Event Models ===
 
 
-class SSEEventType(str, Enum):
+class SSEEventType(StrEnum):
     """Types d'événements SSE."""
 
     ROUTING = "routing"

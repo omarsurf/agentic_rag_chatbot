@@ -10,21 +10,20 @@ Ces tests vérifient l'intégration entre l'orchestrateur et les 5 tools :
 Lancer avec: pytest tests/integration/test_orchestrator_tools.py -v -m integration
 """
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.tools.retrieve_gri import retrieve_gri_chunks, RetrieveGRIOutput
-from src.tools.milestones import (
-    get_milestone_criteria,
-    GetMilestoneOutput,
-    normalize_milestone_id,
-    MILESTONE_ALIASES,
-)
-from src.tools.glossary import lookup_gri_glossary
-from src.tools.phases import get_phase_summary
-from src.tools.compare import compare_approaches
-from src.core.vector_store import GRIHybridStore, SearchResult
+import pytest
 
+from src.core.vector_store import GRIHybridStore, SearchResult
+from src.tools.compare import compare_approaches
+from src.tools.glossary import lookup_gri_glossary
+from src.tools.milestones import (
+    MILESTONE_ALIASES,
+    get_milestone_criteria,
+    normalize_milestone_id,
+)
+from src.tools.phases import get_phase_summary
+from src.tools.retrieve_gri import RetrieveGRIOutput, retrieve_gri_chunks
 
 pytestmark = pytest.mark.integration
 
@@ -318,6 +317,7 @@ class TestLookupGRIGlossaryTool:
     @pytest.mark.asyncio
     async def test_lookup_finds_term(self, mock_store, mock_glossary_result):
         """Le tool trouve un terme du glossaire."""
+        _ = mock_glossary_result
         result = await lookup_gri_glossary(
             term="artefact",
             store=mock_store,
@@ -346,6 +346,7 @@ class TestLookupGRIGlossaryTool:
     @pytest.mark.asyncio
     async def test_lookup_case_insensitive(self, mock_store, mock_glossary_result):
         """Le tool est insensible à la casse."""
+        _ = mock_glossary_result
         await lookup_gri_glossary(term="ARTEFACT", store=mock_store)
         await lookup_gri_glossary(term="Artefact", store=mock_store)
         await lookup_gri_glossary(term="artefact", store=mock_store)
@@ -487,11 +488,12 @@ class TestOrchestratorToolIntegration:
     @pytest.mark.asyncio
     async def test_orchestrator_calls_correct_tool(self, mock_store, mock_llm_client):
         """L'orchestrateur appelle le bon tool selon l'intent."""
+        _ = mock_llm_client
         from src.agents.orchestrator import GRIOrchestrator
         from src.agents.query_router import (
+            ROUTING_TABLE,
             GRICycle,
             GRIIntent,
-            ROUTING_TABLE,
             RoutingResult,
         )
 
@@ -515,6 +517,7 @@ class TestOrchestratorToolIntegration:
     @pytest.mark.asyncio
     async def test_tool_results_formatted_for_llm(self, mock_store, mock_search_results):
         """Les résultats des tools sont formatés pour le LLM."""
+        _ = mock_search_results
         result = await retrieve_gri_chunks(
             query="test",
             store=mock_store,

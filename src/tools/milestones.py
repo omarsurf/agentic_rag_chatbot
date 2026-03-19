@@ -22,8 +22,8 @@ from pydantic import BaseModel, Field
 
 from src.core.config import CIR_GRI_MAPPING, VALID_MILESTONES
 from src.core.milestone_retriever import (
-    GRIMilestoneRetriever,
     MILESTONE_NAMES,
+    GRIMilestoneRetriever,
     MilestoneResult,
 )
 

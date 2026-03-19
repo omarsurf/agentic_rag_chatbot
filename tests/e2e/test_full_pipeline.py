@@ -7,9 +7,9 @@ Exécution:
     pytest tests/e2e/test_full_pipeline.py -v -m e2e
 """
 
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-from pathlib import Path
 
 pytestmark = pytest.mark.e2e
 
@@ -98,7 +98,8 @@ class TestRetrievalToOrchestration:
     @pytest.mark.asyncio
     async def test_orchestrator_routes_definition_query(self, mock_orchestrator_deps):
         """L'orchestrateur route correctement une question de définition."""
-        from src.agents.query_router import GRIQueryRouter, GRIIntent
+        _ = mock_orchestrator_deps
+        from src.agents.query_router import GRIIntent, GRIQueryRouter
 
         router = GRIQueryRouter()
 
@@ -114,7 +115,8 @@ class TestRetrievalToOrchestration:
     @pytest.mark.asyncio
     async def test_orchestrator_routes_milestone_query(self, mock_orchestrator_deps):
         """L'orchestrateur route correctement une question de jalon."""
-        from src.agents.query_router import GRIQueryRouter, GRIIntent
+        _ = mock_orchestrator_deps
+        from src.agents.query_router import GRIIntent, GRIQueryRouter
 
         router = GRIQueryRouter()
 
@@ -176,6 +178,7 @@ class TestAPIEndToEnd:
     def client(self):
         """Client de test FastAPI."""
         from fastapi.testclient import TestClient
+
         from src.api.main import app
         return TestClient(app)
 
@@ -207,7 +210,7 @@ class TestDataFlow:
 
     def test_chunk_metadata_preserved_through_pipeline(self):
         """Les métadonnées des chunks sont préservées."""
-        from src.ingestion.models import GRIChunk, GRIMetadata, SectionType, Cycle
+        from src.ingestion.models import Cycle, GRIChunk, GRIMetadata, SectionType
 
         # Créer un chunk avec métadonnées complètes
         metadata = GRIMetadata(
@@ -237,8 +240,8 @@ class TestDataFlow:
 
     def test_query_response_contains_required_fields(self):
         """La réponse de query contient tous les champs requis."""
-        from src.api.models import QueryResponse, Citation
-        from datetime import datetime
+
+        from src.api.models import Citation, QueryResponse
 
         response = QueryResponse(
             query_id="test-123",
@@ -262,6 +265,7 @@ class TestErrorHandling:
     @pytest.fixture
     def client(self):
         from fastapi.testclient import TestClient
+
         from src.api.main import app
         return TestClient(app)
 
@@ -297,7 +301,7 @@ class TestCIRGRIMapping:
 
     def test_valid_milestones(self):
         """Les jalons valides sont correctement définis."""
-        from src.core.config import VALID_GRI_MILESTONES, VALID_CIR_MILESTONES
+        from src.core.config import VALID_CIR_MILESTONES, VALID_GRI_MILESTONES
 
         assert "M0" in VALID_GRI_MILESTONES
         assert "M9" in VALID_GRI_MILESTONES

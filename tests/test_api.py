@@ -6,11 +6,12 @@ Exécution:
     pytest tests/test_api.py -v
 """
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from fastapi.testclient import TestClient
 
-from src.api.main import app, get_store, get_or_create_memory
+from src.api.main import app
 from src.api.models import CycleType, IntentType
 
 

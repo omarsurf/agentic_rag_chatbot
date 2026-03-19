@@ -8,29 +8,26 @@ Couvre :
 - GRIMilestoneRetriever (milestone_retriever.py)
 """
 
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from src.agents.query_router import (
-    GRIIntent,
-    GRICycle,
-    GRIQueryRouter,
-    RoutingResult,
     ROUTING_TABLE,
+    GRICycle,
+    GRIIntent,
+    GRIQueryRouter,
     get_strategy_for_intent,
-)
-from src.core.term_expander import (
-    GRITermExpander,
-    GRI_KEY_TERMS,
-    detect_gri_terms,
-    ExpansionResult,
 )
 from src.core.config import (
     CIR_GRI_MAPPING,
-    VALID_GRI_MILESTONES,
     VALID_CIR_MILESTONES,
+    VALID_GRI_MILESTONES,
 )
-
+from src.core.term_expander import (
+    GRITermExpander,
+    detect_gri_terms,
+)
 
 # =============================================================================
 # Tests Query Router
@@ -282,12 +279,12 @@ class TestCIRGRIMapping:
     def test_valid_gri_milestones(self):
         """Jalons GRI valides M0-M9."""
         expected = {f"M{i}" for i in range(10)}
-        assert VALID_GRI_MILESTONES == expected
+        assert expected == VALID_GRI_MILESTONES
 
     def test_valid_cir_milestones(self):
         """Jalons CIR valides J1-J6."""
         expected = {f"J{i}" for i in range(1, 7)}
-        assert VALID_CIR_MILESTONES == expected
+        assert expected == VALID_CIR_MILESTONES
 
 
 # =============================================================================

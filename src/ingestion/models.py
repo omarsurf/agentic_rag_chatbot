@@ -4,13 +4,13 @@ Définit les structures de données pour les chunks et leurs métadonnées.
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, computed_field, field_validator
 
 
-class SectionType(str, Enum):
+class SectionType(StrEnum):
     """Types de sections dans le document GRI."""
 
     DEFINITION = "definition"
@@ -24,7 +24,7 @@ class SectionType(str, Enum):
     CONTENT = "content"
 
 
-class Cycle(str, Enum):
+class Cycle(StrEnum):
     """Cycles de développement GRI."""
 
     GRI = "GRI"
@@ -173,9 +173,8 @@ class GRIMetadata(BaseModel):
 
     def model_post_init(self, __context) -> None:
         """Enrichir automatiquement les métadonnées CIR."""
-        if self.cycle == Cycle.CIR and self.milestone_id:
-            if self.milestone_id in CIR_GRI_MAPPING:
-                self.gri_equivalent = CIR_GRI_MAPPING[self.milestone_id]
+        if self.cycle == Cycle.CIR and self.milestone_id in CIR_GRI_MAPPING:
+            self.gri_equivalent = CIR_GRI_MAPPING[self.milestone_id]
 
     def get(self, key: str, default: Any = None) -> Any:
         """Compatibilité dict-like pour certains appels historiques."""

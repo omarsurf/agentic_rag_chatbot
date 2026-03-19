@@ -13,6 +13,7 @@ Usage:
     )
 """
 
+import contextlib
 from typing import TYPE_CHECKING, Any, Literal
 
 import structlog
@@ -127,6 +128,7 @@ async def get_phase_summary(
     Returns:
         GetPhaseSummaryOutput avec le résumé de la phase
     """
+    _ = include_milestone_criteria
     log.info(
         "tool.get_phase_summary.start",
         phase_num=phase_num,
@@ -184,7 +186,7 @@ async def get_phase_summary(
 
     if not results:
         # Essayer sans le filtre phase_num (peut être manquant dans les metadata)
-        try:
+        with contextlib.suppress(Exception):
             results = await store.hybrid_search(
                 query=f"Phase {phase_num} {phase_name} {cycle}",
                 collection="main",
@@ -192,8 +194,6 @@ async def get_phase_summary(
                 filters={"section_type": "phase"} if cycle == "BOTH" else {"cycle": cycle},
                 alpha=0.7,
             )
-        except Exception:
-            pass
 
     if not results:
         return GetPhaseSummaryOutput(

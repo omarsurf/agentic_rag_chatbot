@@ -24,7 +24,8 @@ import json
 import re
 import time
 import uuid
-from typing import Any, AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Any
 
 import structlog
 from huggingface_hub import AsyncInferenceClient
@@ -465,7 +466,7 @@ def _format_tool_results_from_cache(
     """
     lines = []
 
-    for tc, result in zip(tool_calls, results):
+    for tc, result in zip(tool_calls, results, strict=False):
         lines.append(f"## Résultat de {tc['name']}")
         lines.append("")
         lines.append(format_tool_result_for_llm(result))

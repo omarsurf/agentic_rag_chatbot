@@ -4,17 +4,16 @@ Ces tests vérifient le comportement de l'orchestrateur ReAct,
 incluant le routing, l'exécution des tools, et la génération des réponses.
 """
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from src.agents.orchestrator import (
     GRIOrchestrator,
-    OrchestratorResult,
     ToolCall,
 )
-from src.agents.query_router import GRICycle, GRIIntent, RoutingResult, RoutingStrategy
+from src.agents.query_router import GRICycle, GRIIntent, RoutingResult
 from src.core.memory import GRIMemory
-
 
 # === Fixtures ===
 
@@ -178,6 +177,7 @@ class TestMemoryIntegration:
 
     def test_memory_is_updated_after_run(self, mock_store, mock_memory):
         """Teste que la mémoire est mise à jour après une exécution."""
+        _ = mock_store
         # Ce test nécessiterait un mock complet du client HF
         # Pour l'instant, on teste juste la mémoire en isolation
         mock_memory.add_turn(
@@ -316,9 +316,9 @@ class TestOrchestratorIntegration:
     @pytest.fixture
     def mock_orchestrator(self):
         """Orchestrateur avec tous les composants mockés."""
-        from unittest.mock import AsyncMock, MagicMock, patch
+        from unittest.mock import AsyncMock, MagicMock
+
         from src.agents.orchestrator import GRIOrchestrator
-        from src.agents.query_router import GRIIntent, GRICycle, RoutingResult
 
         mock_store = MagicMock()
         mock_store.hybrid_search = AsyncMock(return_value=[
@@ -355,11 +355,12 @@ Voici les critères du CDR (M4) :
     @pytest.mark.asyncio
     async def test_full_jalon_query(self, mock_orchestrator):
         """Teste une query complète sur un jalon avec mock."""
-        from unittest.mock import AsyncMock, patch
+        from unittest.mock import AsyncMock
+
         from src.agents.query_router import (
+            ROUTING_TABLE,
             GRICycle,
             GRIIntent,
-            ROUTING_TABLE,
             RoutingResult,
         )
 
@@ -384,11 +385,11 @@ Voici les critères du CDR (M4) :
     async def test_full_definition_query(self, mock_orchestrator):
         """Teste une query complète de définition avec mock."""
         from unittest.mock import AsyncMock
+
         from src.agents.query_router import (
+            ROUTING_TABLE,
             GRICycle,
             GRIIntent,
-            ROUTING_TABLE,
-            RoutingResult,
         )
 
         # Mock le routing pour retourner DEFINITION

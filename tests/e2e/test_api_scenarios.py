@@ -6,8 +6,9 @@ Exécution:
     pytest tests/e2e/test_api_scenarios.py -v -m e2e
 """
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 pytestmark = pytest.mark.e2e
 
@@ -18,11 +19,13 @@ class TestDefinitionScenario:
     @pytest.fixture
     def client(self):
         from fastapi.testclient import TestClient
+
         from src.api.main import app
         return TestClient(app)
 
     def test_definition_query_format(self, client):
         """La query de définition est correctement formatée."""
+        _ = client
         from src.api.models import QueryRequest
 
         request = QueryRequest(
@@ -40,7 +43,7 @@ class TestMilestoneScenario:
 
     def test_milestone_query_with_gri_cycle(self):
         """Query de jalon avec cycle GRI explicite."""
-        from src.api.models import QueryRequest, CycleType
+        from src.api.models import CycleType, QueryRequest
 
         request = QueryRequest(
             query="Quels sont les critères du CDR (M4) ?",
@@ -51,7 +54,7 @@ class TestMilestoneScenario:
 
     def test_milestone_query_with_cir_cycle(self):
         """Query de jalon avec cycle CIR explicite."""
-        from src.api.models import QueryRequest, CycleType
+        from src.api.models import CycleType, QueryRequest
 
         request = QueryRequest(
             query="Critères du jalon J3 du CIR ?",
@@ -82,11 +85,13 @@ class TestSessionScenario:
     @pytest.fixture
     def client(self):
         from fastapi.testclient import TestClient
+
         from src.api.main import app
         return TestClient(app)
 
     def test_session_id_preserved(self, client):
         """L'ID de session est préservé entre les requêtes."""
+        _ = client
         from src.api.models import QueryRequest
 
         # Use valid UUID v4 format
@@ -120,6 +125,7 @@ class TestFeedbackScenario:
     @pytest.fixture
     def client(self):
         from fastapi.testclient import TestClient
+
         from src.api.main import app
         return TestClient(app)
 
@@ -168,6 +174,7 @@ class TestErrorScenarios:
     @pytest.fixture
     def client(self):
         from fastapi.testclient import TestClient
+
         from src.api.main import app
         return TestClient(app)
 
@@ -273,6 +280,7 @@ class TestStreamingEndpoint:
     @pytest.fixture
     def client(self):
         from fastapi.testclient import TestClient
+
         from src.api.main import app
         return TestClient(app)
 
@@ -317,7 +325,6 @@ class TestStreamingEndpoint:
     async def test_stream_query_response_emits_routing(self):
         """stream_query_response émet un événement routing."""
         from src.api.streaming import stream_query_response
-        from unittest.mock import AsyncMock, MagicMock
 
         mock_store = MagicMock()
         mock_store.hybrid_search = AsyncMock(return_value=[])
@@ -377,8 +384,9 @@ class TestAuthEndpoints:
 
     def test_auth_disabled_on_localhost(self):
         """Auth est désactivée sur localhost."""
-        from src.api.auth import is_auth_required
         from unittest.mock import patch
+
+        from src.api.auth import is_auth_required
 
         with patch("src.api.auth.settings") as mock_settings:
             mock_settings.api_host = "127.0.0.1"
@@ -389,8 +397,9 @@ class TestAuthEndpoints:
 
     def test_auth_enabled_non_localhost(self):
         """Auth est activée hors localhost si token configuré."""
-        from src.api.auth import is_auth_required
         from unittest.mock import patch
+
+        from src.api.auth import is_auth_required
 
         with patch("src.api.auth.settings") as mock_settings:
             mock_settings.api_host = "0.0.0.0"
@@ -401,8 +410,9 @@ class TestAuthEndpoints:
 
     def test_auth_explicitly_enabled(self):
         """Auth peut être explicitement activée."""
-        from src.api.auth import is_auth_required
         from unittest.mock import patch
+
+        from src.api.auth import is_auth_required
 
         with patch("src.api.auth.settings") as mock_settings:
             mock_settings.api_host = "127.0.0.1"
@@ -413,10 +423,12 @@ class TestAuthEndpoints:
 
     def test_verify_token_missing_header(self):
         """401 si header Authorization manquant."""
-        from src.api.auth import verify_token, is_auth_required
-        from fastapi import HTTPException
         from unittest.mock import patch
+
         import pytest
+        from fastapi import HTTPException
+
+        from src.api.auth import verify_token
 
         with patch("src.api.auth.settings") as mock_settings:
             mock_settings.api_host = "0.0.0.0"
@@ -432,11 +444,13 @@ class TestAuthEndpoints:
 
     def test_verify_token_invalid(self):
         """401 si token invalide."""
-        from src.api.auth import verify_token
+        from unittest.mock import patch
+
+        import pytest
         from fastapi import HTTPException
         from fastapi.security import HTTPAuthorizationCredentials
-        from unittest.mock import patch, MagicMock
-        import pytest
+
+        from src.api.auth import verify_token
 
         mock_creds = MagicMock(spec=HTTPAuthorizationCredentials)
         mock_creds.credentials = "wrong_token"
@@ -455,9 +469,11 @@ class TestAuthEndpoints:
 
     def test_verify_token_valid(self):
         """Token valide accepté."""
-        from src.api.auth import verify_token
+        from unittest.mock import patch
+
         from fastapi.security import HTTPAuthorizationCredentials
-        from unittest.mock import patch, MagicMock
+
+        from src.api.auth import verify_token
 
         mock_creds = MagicMock(spec=HTTPAuthorizationCredentials)
         mock_creds.credentials = "correct_token"
@@ -491,12 +507,13 @@ class TestSessionManagement:
     @pytest.fixture
     def client(self):
         from fastapi.testclient import TestClient
+
         from src.api.main import app
         return TestClient(app)
 
     def test_session_creation_with_query(self, client):
         """Une session est créée lors d'une query avec session_id."""
-        from unittest.mock import patch, AsyncMock, MagicMock
+        from unittest.mock import patch
 
         # Mock l'orchestrateur pour éviter les appels réels
         with patch("src.api.main.GRIOrchestrator") as MockOrch:
@@ -539,8 +556,8 @@ class TestSessionManagement:
 
     def test_memory_context_preserved(self):
         """Le contexte mémoire est préservé entre les requêtes."""
+        from src.agents.query_router import GRICycle, GRIIntent
         from src.core.memory import GRIMemory
-        from src.agents.query_router import GRIIntent, GRICycle
 
         memory = GRIMemory(session_id="test-session", max_turns=10)
 
@@ -567,8 +584,8 @@ class TestSessionManagement:
 
     def test_memory_eviction_on_max_turns(self):
         """Les tours anciens sont évincés quand max_turns est atteint."""
+        from src.agents.query_router import GRICycle, GRIIntent
         from src.core.memory import GRIMemory
-        from src.agents.query_router import GRIIntent, GRICycle
 
         memory = GRIMemory(session_id="test-eviction", max_turns=2)
 
@@ -597,6 +614,7 @@ class TestRateLimiting:
     @pytest.fixture
     def client(self):
         from fastapi.testclient import TestClient
+
         from src.api.main import app
         return TestClient(app)
 

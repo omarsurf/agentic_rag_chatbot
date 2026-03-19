@@ -60,6 +60,7 @@ def postprocess_gri_answer(
         - has_normative_content: bool
         - validation: Dict de résultats de validation
     """
+    _ = context_chunks
     warnings: list[str] = []
     validation: dict[str, Any] = {}
 
@@ -161,7 +162,7 @@ def validate_phases(text: str) -> dict[str, Any]:
     """
     # Trouver toutes les phases citées
     phase_matches = re.findall(r"[Pp]hase\s+(\d+)", text)
-    cited = set(int(p) for p in phase_matches)
+    cited = {int(p) for p in phase_matches}
 
     # Déterminer le cycle (CIR ou GRI) selon le contexte
     is_cir = "cir" in text.lower()
@@ -273,11 +274,7 @@ def _looks_like_definition(text: str) -> bool:
         r"selon\s+(?:le\s+)?GRI",
     ]
 
-    for pattern in patterns:
-        if re.search(pattern, text, re.IGNORECASE):
-            return True
-
-    return False
+    return any(re.search(pattern, text, re.IGNORECASE) for pattern in patterns)
 
 
 def clean_response(text: str) -> str:
@@ -324,6 +321,7 @@ def add_source_footer(
     Returns:
         Réponse avec footer
     """
+    _ = response_type
     # Vérifier si un footer existe déjà
     if re.search(r"\*\*Sources?\s*:\*\*", answer, re.IGNORECASE):
         return answer

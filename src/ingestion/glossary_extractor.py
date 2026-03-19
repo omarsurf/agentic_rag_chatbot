@@ -257,11 +257,7 @@ class GRIGlossaryExtractor:
             else:
                 # Garder l'entrée la plus complète
                 existing = seen[key]
-                if len(entry.definition_fr) > len(existing.definition_fr):
-                    seen[key] = entry
-                elif entry.term_en and not existing.term_en:
-                    seen[key] = entry
-                elif entry.standard_ref and not existing.standard_ref:
+                if len(entry.definition_fr) > len(existing.definition_fr) or entry.term_en and not existing.term_en or entry.standard_ref and not existing.standard_ref:
                     seen[key] = entry
 
         return list(seen.values())

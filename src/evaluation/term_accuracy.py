@@ -15,7 +15,6 @@ Usage:
 
 import json
 import re
-from typing import Any
 
 import structlog
 from huggingface_hub import AsyncInferenceClient

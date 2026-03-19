@@ -19,7 +19,6 @@ Usage:
 
 from typing import Any
 
-
 # === Tool 1: retrieve_gri_chunks ===
 RETRIEVE_GRI_CHUNKS = {
     "name": "retrieve_gri_chunks",

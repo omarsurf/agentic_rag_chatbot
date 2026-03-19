@@ -4,7 +4,6 @@ Les tables de critères de jalons sont la partie la plus critique.
 Ne jamais perdre ces données.
 """
 
-import re
 from pathlib import Path
 
 from docx import Document as DocxDocument
@@ -300,9 +299,8 @@ class GRITableExtractor:
         # 1. Recherche partielle de clé
         for key, value in row.items():
             key_lower = key.lower()
-            if any(term in key_lower for term in criterion_terms):
-                if value and len(value) > 5:  # Éviter les IDs courts
-                    return value
+            if any(term in key_lower for term in criterion_terms) and value and len(value) > 5:
+                return value
 
         # 2. Fallback: prendre la valeur la plus longue
         # Le critère est généralement le texte le plus long de la ligne
