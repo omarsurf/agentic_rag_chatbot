@@ -29,25 +29,24 @@ class RetrieveGRIInput(BaseModel):
     """Input pour le tool retrieve_gri_chunks."""
 
     query: str = Field(..., description="La question ou le concept à rechercher")
-    section_type: Literal[
-        "definition",
-        "principle",
-        "phase",
-        "milestone",
-        "process",
-        "cir",
-        "table",
-        "content",
-    ] | None = Field(default=None, description="Filtrer par type de section GRI")
-    cycle: Literal["GRI", "CIR", "BOTH"] = Field(
-        default="GRI", description="Filtrer par cycle"
-    )
+    section_type: (
+        Literal[
+            "definition",
+            "principle",
+            "phase",
+            "milestone",
+            "process",
+            "cir",
+            "table",
+            "content",
+        ]
+        | None
+    ) = Field(default=None, description="Filtrer par type de section GRI")
+    cycle: Literal["GRI", "CIR", "BOTH"] = Field(default="GRI", description="Filtrer par cycle")
     phase_num: int | None = Field(
         default=None, ge=1, le=7, description="Filtrer par numéro de phase (1-7)"
     )
-    n_results: int = Field(
-        default=5, ge=1, le=15, description="Nombre de résultats à retourner"
-    )
+    n_results: int = Field(default=5, ge=1, le=15, description="Nombre de résultats à retourner")
 
 
 class RetrieveChunk(BaseModel):

@@ -397,9 +397,7 @@ async def compute_context_precision(
         if json_match:
             data = json.loads(json_match.group())
 
-            chunk_evals = [
-                ChunkEvaluation(**ce) for ce in data.get("chunk_evaluations", [])
-            ]
+            chunk_evals = [ChunkEvaluation(**ce) for ce in data.get("chunk_evaluations", [])]
 
             return ContextPrecisionResult(
                 precision_score=data.get("precision_score", 0.5),

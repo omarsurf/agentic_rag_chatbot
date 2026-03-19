@@ -80,9 +80,7 @@ class GRIChunker:
     }
 
     def __init__(self, doc_id: str | None = None) -> None:
-        self.doc_id = doc_id or hashlib.sha256(
-            uuid.uuid4().hex.encode("utf-8")
-        ).hexdigest()[:16]
+        self.doc_id = doc_id or hashlib.sha256(uuid.uuid4().hex.encode("utf-8")).hexdigest()[:16]
         self._chunk_index = 0
 
     def chunk_section(self, section: ParsedSection) -> list[GRIChunk]:
@@ -529,11 +527,13 @@ class GRIChunker:
                 )
 
                 chunk_id = self._hash_content(content)
-                chunks.append(GRIChunk(
-                    chunk_id=chunk_id,
-                    content=content,
-                    metadata=metadata,
-                ))
+                chunks.append(
+                    GRIChunk(
+                        chunk_id=chunk_id,
+                        content=content,
+                        metadata=metadata,
+                    )
+                )
 
                 # Overlap: garder les dernières phrases
                 overlap_sentences = current_chunk[-2:] if overlap > 0 else []
@@ -560,11 +560,13 @@ class GRIChunker:
             )
 
             chunk_id = self._hash_content(content)
-            chunks.append(GRIChunk(
-                chunk_id=chunk_id,
-                content=content,
-                metadata=metadata,
-            ))
+            chunks.append(
+                GRIChunk(
+                    chunk_id=chunk_id,
+                    content=content,
+                    metadata=metadata,
+                )
+            )
 
         return chunks
 
@@ -638,7 +640,7 @@ class GRIChunker:
     def _split_sentences(self, text: str) -> list[str]:
         """Divise le texte en phrases."""
         # Pattern simple pour le français
-        sentences = re.split(r'(?<=[.!?])\s+', text)
+        sentences = re.split(r"(?<=[.!?])\s+", text)
         return [s.strip() for s in sentences if s.strip()]
 
     def _extract_phase_num(self, text: str) -> int | None:

@@ -27,13 +27,13 @@ log = structlog.get_logger()
 
 # Types d'erreurs GRI spécifiques
 GRI_ERROR_TYPES = [
-    "jalon_inexistant",      # Citer un jalon qui n'existe pas (M10, J7...)
-    "mauvais_mapping",       # Mauvais mapping CIR↔GRI
-    "phase_inexistante",     # Phase inexistante (Phase 8, 9...)
-    "critere_invente",       # Critère de jalon inventé
-    "duree_inventee",        # Durée non mentionnée dans les sources
+    "jalon_inexistant",  # Citer un jalon qui n'existe pas (M10, J7...)
+    "mauvais_mapping",  # Mauvais mapping CIR↔GRI
+    "phase_inexistante",  # Phase inexistante (Phase 8, 9...)
+    "critere_invente",  # Critère de jalon inventé
+    "duree_inventee",  # Durée non mentionnée dans les sources
     "processus_inexistant",  # Processus IS 15288 inexistant
-    "definition_incorrecte", # Définition ISO incorrecte
+    "definition_incorrecte",  # Définition ISO incorrecte
 ]
 
 

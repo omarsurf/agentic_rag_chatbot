@@ -73,9 +73,7 @@ class GRIMemory:
 
     MAX_TURNS: int = 10
 
-    def __init__(
-        self, session_id: str | None = None, max_turns: int | None = None
-    ) -> None:
+    def __init__(self, session_id: str | None = None, max_turns: int | None = None) -> None:
         """Initialise la mémoire.
 
         Args:

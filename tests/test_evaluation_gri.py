@@ -138,12 +138,18 @@ class TestTermAccuracyCalculation:
 
         evals = [
             TermEvaluation(
-                term="t1", definition_in_answer="", normative_definition="",
-                status="EXACT", severity="OK"
+                term="t1",
+                definition_in_answer="",
+                normative_definition="",
+                status="EXACT",
+                severity="OK",
             ),
             TermEvaluation(
-                term="t2", definition_in_answer="", normative_definition="",
-                status="APPROXIMATIF", severity="MINEUR"
+                term="t2",
+                definition_in_answer="",
+                normative_definition="",
+                status="APPROXIMATIF",
+                severity="MINEUR",
             ),
         ]
         score = _calculate_score(evals)

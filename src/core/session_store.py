@@ -71,6 +71,7 @@ class SessionStore(ABC):
             asyncio.get_running_loop()
             # We're in an async context, create a task
             import concurrent.futures
+
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 future = pool.submit(asyncio.run, self.load_session(session_id))
                 return future.result()
@@ -128,9 +129,7 @@ class SessionStore(ABC):
 class InMemorySessionStore(SessionStore):
     """In-memory session store (default, for dev/single-instance)."""
 
-    def __init__(
-        self, ttl_seconds: int | None = None, default_ttl: int | None = None
-    ) -> None:
+    def __init__(self, ttl_seconds: int | None = None, default_ttl: int | None = None) -> None:
         self._sessions: dict[str, tuple[GRIMemory, float]] = {}
         self._ttl = default_ttl or ttl_seconds or settings.session_ttl_seconds
 
@@ -168,9 +167,7 @@ class InMemorySessionStore(SessionStore):
     async def cleanup_expired(self) -> int:
         now = time.time()
         expired = [
-            sid
-            for sid, (_, last_access) in self._sessions.items()
-            if now - last_access > self._ttl
+            sid for sid, (_, last_access) in self._sessions.items() if now - last_access > self._ttl
         ]
         for sid in expired:
             del self._sessions[sid]
@@ -207,11 +204,13 @@ class RedisSessionStore(SessionStore):
     def _serialize_memory(self, memory: GRIMemory) -> str:
         """Serialize GRIMemory to JSON."""
         turns_data = [turn.to_dict() for turn in memory.turns]
-        return json.dumps({
-            "session_id": memory.session_id,
-            "turns": turns_data,
-            "max_turns": memory._max_turns,
-        })
+        return json.dumps(
+            {
+                "session_id": memory.session_id,
+                "turns": turns_data,
+                "max_turns": memory._max_turns,
+            }
+        )
 
     def _deserialize_memory(self, data: str) -> GRIMemory:
         """Deserialize JSON to GRIMemory."""
@@ -270,9 +269,7 @@ class RedisSessionStore(SessionStore):
             result = await redis.delete(key)
             return result > 0
         except Exception as e:
-            log.error(
-                "redis_session.delete_failed", session_id=session_id, error=str(e)
-            )
+            log.error("redis_session.delete_failed", session_id=session_id, error=str(e))
             return False
 
     async def cleanup_expired(self) -> int:
@@ -359,9 +356,7 @@ class PostgresSessionStore(SessionStore):
 
             return True
         except Exception as e:
-            log.error(
-                "postgres_session.save_failed", session_id=session_id, error=str(e)
-            )
+            log.error("postgres_session.save_failed", session_id=session_id, error=str(e))
             return False
 
     async def load_session(self, session_id: str) -> GRIMemory | None:
@@ -395,9 +390,7 @@ class PostgresSessionStore(SessionStore):
                 data = json.loads(row["memory_data"])
                 return self._deserialize_memory(data)
         except Exception as e:
-            log.error(
-                "postgres_session.load_failed", session_id=session_id, error=str(e)
-            )
+            log.error("postgres_session.load_failed", session_id=session_id, error=str(e))
             return None
 
     async def delete_session(self, session_id: str) -> bool:
@@ -410,9 +403,7 @@ class PostgresSessionStore(SessionStore):
                 )
                 return "DELETE 1" in result
         except Exception as e:
-            log.error(
-                "postgres_session.delete_failed", session_id=session_id, error=str(e)
-            )
+            log.error("postgres_session.delete_failed", session_id=session_id, error=str(e))
             return False
 
     async def cleanup_expired(self) -> int:
@@ -449,11 +440,7 @@ def get_session_store() -> SessionStore:
         if backend == "redis" and hasattr(settings, "redis_url") and settings.redis_url:
             _session_store = RedisSessionStore()
             log.info("session_store.init", backend="redis")
-        elif (
-            backend == "postgres"
-            and hasattr(settings, "postgres_dsn")
-            and settings.postgres_dsn
-        ):
+        elif backend == "postgres" and hasattr(settings, "postgres_dsn") and settings.postgres_dsn:
             _session_store = PostgresSessionStore()
             log.info("session_store.init", backend="postgres")
         else:

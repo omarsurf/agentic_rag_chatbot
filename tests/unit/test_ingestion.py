@@ -246,8 +246,9 @@ class TestGRIChunker:
         chunks = chunker.chunk_sections([sample_phase_section])
 
         for chunk in chunks:
-            assert chunk.content.startswith("[GRI") or chunk.content.startswith("[CIR"), \
-                f"Context prefix manquant sur chunk {chunk.chunk_id}"
+            assert chunk.content.startswith("[GRI") or chunk.content.startswith(
+                "[CIR"
+            ), f"Context prefix manquant sur chunk {chunk.chunk_id}"
 
     def test_milestone_not_split(
         self,
@@ -258,10 +259,7 @@ class TestGRIChunker:
         chunks = chunker.chunk_sections([sample_milestone_section])
 
         # Il ne doit y avoir qu'un seul chunk pour le jalon
-        milestone_chunks = [
-            c for c in chunks
-            if c.metadata.section_type == SectionType.MILESTONE
-        ]
+        milestone_chunks = [c for c in chunks if c.metadata.section_type == SectionType.MILESTONE]
         assert len(milestone_chunks) == 1, "Le jalon M4 ne doit pas être fragmenté"
 
     def test_milestone_id_extracted(
@@ -286,8 +284,9 @@ class TestGRIChunker:
         cir_chunks = [c for c in chunks if c.metadata.cycle == Cycle.CIR]
         for chunk in cir_chunks:
             if chunk.metadata.milestone_id:
-                assert chunk.metadata.gri_equivalent is not None, \
-                    f"Mapping GRI manquant pour {chunk.metadata.milestone_id}"
+                assert (
+                    chunk.metadata.gri_equivalent is not None
+                ), f"Mapping GRI manquant pour {chunk.metadata.milestone_id}"
 
     def test_glossary_one_term_one_chunk(
         self,
@@ -419,24 +418,32 @@ class TestTableExtractor:
         extractor = GRITableExtractor()
 
         # Nom exact
-        assert extractor._find_criterion_text(
-            {"Critère": "Architecture définie", "ID": "1"}
-        ) == "Architecture définie"
+        assert (
+            extractor._find_criterion_text({"Critère": "Architecture définie", "ID": "1"})
+            == "Architecture définie"
+        )
 
         # Nom partiel "Critère d'acceptation"
-        assert extractor._find_criterion_text(
-            {"Critère d'acceptation": "Interfaces spécifiées", "Ref": "CR-02"}
-        ) == "Interfaces spécifiées"
+        assert (
+            extractor._find_criterion_text(
+                {"Critère d'acceptation": "Interfaces spécifiées", "Ref": "CR-02"}
+            )
+            == "Interfaces spécifiées"
+        )
 
         # Nom "Description"
-        assert extractor._find_criterion_text(
-            {"N°": "3", "Description": "Risques maîtrisés"}
-        ) == "Risques maîtrisés"
+        assert (
+            extractor._find_criterion_text({"N°": "3", "Description": "Risques maîtrisés"})
+            == "Risques maîtrisés"
+        )
 
         # Nom "Besoin"
-        assert extractor._find_criterion_text(
-            {"ID": "B1", "Besoin fonctionnel": "Le système doit valider les entrées"}
-        ) == "Le système doit valider les entrées"
+        assert (
+            extractor._find_criterion_text(
+                {"ID": "B1", "Besoin fonctionnel": "Le système doit valider les entrées"}
+            )
+            == "Le système doit valider les entrées"
+        )
 
     def test_find_criterion_text_fallback_longest(self):
         """En cas d'absence de clé connue, prend la valeur la plus longue."""

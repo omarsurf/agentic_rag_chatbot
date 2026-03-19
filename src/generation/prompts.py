@@ -226,7 +226,14 @@ PROMPT_CONFIGS: dict[GRIResponseType, PromptConfig] = {
     GRIResponseType.PHASE_COMPLETE: PromptConfig(
         template=PHASE_PROMPT,
         system_addon="",
-        required_vars=["cycle", "phase_num", "phase_title", "entry_milestone", "exit_milestone", "context"],
+        required_vars=[
+            "cycle",
+            "phase_num",
+            "phase_title",
+            "entry_milestone",
+            "exit_milestone",
+            "context",
+        ],
     ),
     GRIResponseType.COMPARISON: PromptConfig(
         template=COMPARISON_PROMPT,

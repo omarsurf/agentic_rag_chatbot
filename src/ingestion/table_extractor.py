@@ -235,9 +235,7 @@ class GRITableExtractor:
         # Priorité 3: Fallback sur le texte complet (avec critères stricts)
         text_lower = full_text.lower()
         # Requérir au moins 2 marqueurs ou un pattern fort pour éviter les faux positifs
-        if "critères" in text_lower and any(
-            m.lower() in text_lower for m in ["passage", "jalon"]
-        ):
+        if "critères" in text_lower and any(m.lower() in text_lower for m in ["passage", "jalon"]):
             return "milestone_criteria"
 
         # Tables de livrables

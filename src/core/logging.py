@@ -43,18 +43,18 @@ def setup_logging(
     ]
 
     if include_timestamp:
-        shared_processors.insert(
-            0, structlog.processors.TimeStamper(fmt="iso", utc=True)
-        )
+        shared_processors.insert(0, structlog.processors.TimeStamper(fmt="iso", utc=True))
 
     if include_caller:
-        shared_processors.append(structlog.processors.CallsiteParameterAdder(
-            [
-                structlog.processors.CallsiteParameter.FILENAME,
-                structlog.processors.CallsiteParameter.LINENO,
-                structlog.processors.CallsiteParameter.FUNC_NAME,
-            ]
-        ))
+        shared_processors.append(
+            structlog.processors.CallsiteParameterAdder(
+                [
+                    structlog.processors.CallsiteParameter.FILENAME,
+                    structlog.processors.CallsiteParameter.LINENO,
+                    structlog.processors.CallsiteParameter.FUNC_NAME,
+                ]
+            )
+        )
 
     # Processor final selon le format
     if log_format == "json":

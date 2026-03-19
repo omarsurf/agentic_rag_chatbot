@@ -227,7 +227,9 @@ class GRIIngestionPipeline:
 
         # Séparer les définitions du reste
         main_chunks = [c for c in chunk_dicts if c["metadata"].get("section_type") != "definition"]
-        glossary_chunks = [c for c in chunk_dicts if c["metadata"].get("section_type") == "definition"]
+        glossary_chunks = [
+            c for c in chunk_dicts if c["metadata"].get("section_type") == "definition"
+        ]
 
         # Indexer dans Qdrant (async)
         async def _do_index():
@@ -338,10 +340,12 @@ def main() -> None:
 
     # Configurer le logging
     from src.core.logging import setup_logging
+
     setup_logging(level="INFO", log_format="console")
 
     # Initialiser le vector store pour l'indexation
     from src.core.vector_store import GRIHybridStore
+
     vector_store = GRIHybridStore()
 
     # Exécuter le pipeline avec vector store

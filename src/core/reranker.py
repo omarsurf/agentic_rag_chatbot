@@ -194,8 +194,7 @@ class GRIReranker:
 
                 # Diversité = dissimilarité max avec les documents sélectionnés
                 max_similarity = max(
-                    self._content_similarity(cand.content, sel.content)
-                    for sel in selected
+                    self._content_similarity(cand.content, sel.content) for sel in selected
                 )
 
                 # Score MMR

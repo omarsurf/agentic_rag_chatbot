@@ -284,31 +284,35 @@ class GRIOrchestrator:
 
             # Ajouter à l'historique et collecter les chunks
             for tc, result in zip(tool_calls, tool_results, strict=False):
-                tool_calls_history.append({
-                    "tool": tc.name,
-                    "input": tc.input,
-                    "iteration": iterations,
-                    "success": result.success,
-                })
+                tool_calls_history.append(
+                    {
+                        "tool": tc.name,
+                        "input": tc.input,
+                        "iteration": iterations,
+                        "success": result.success,
+                    }
+                )
                 # Collecter les chunks/contexte pour GRIGenerator
                 if result.success:
-                    extracted = self._extract_context_from_tool_result(
-                        tc.name, result.result
-                    )
+                    extracted = self._extract_context_from_tool_result(tc.name, result.result)
                     collected_chunks.extend(extracted)
 
             # Ajouter au contexte de conversation
-            messages.append({
-                "role": "assistant",
-                "content": response,
-            })
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": response,
+                }
+            )
 
             # Formater les résultats des tools
             tool_results_text = self._format_tool_results(tool_calls, tool_results)
-            messages.append({
-                "role": "user",
-                "content": f"Résultats des outils :\n\n{tool_results_text}",
-            })
+            messages.append(
+                {
+                    "role": "user",
+                    "content": f"Résultats des outils :\n\n{tool_results_text}",
+                }
+            )
 
         # Si on atteint max_iter sans réponse finale
         if not final_answer:
@@ -348,7 +352,11 @@ class GRIOrchestrator:
             tool_calls=tool_calls_history,
             iterations=iterations,
             latency_ms=latency,
-            warning="max_iterations_reached" if iterations >= self.max_iter and not final_answer else None,
+            warning=(
+                "max_iterations_reached"
+                if iterations >= self.max_iter and not final_answer
+                else None
+            ),
             collected_chunks=collected_chunks,
         )
 
@@ -533,9 +541,7 @@ class GRIOrchestrator:
                         )
                 # Format direct {"name": ..., "input": ...}
                 elif "name" in data and "input" in data:
-                    tool_calls.append(
-                        ToolCall(name=data["name"], input=data["input"])
-                    )
+                    tool_calls.append(ToolCall(name=data["name"], input=data["input"]))
             except json.JSONDecodeError:
                 continue
 
@@ -727,16 +733,18 @@ class GRIOrchestrator:
         elif tool_name == "lookup_gri_glossary" and data.get("found"):
             definition = data.get("definition", {})
             if definition:
-                chunks.append({
-                    "content": (
-                        f"**{definition.get('term_fr', '')}** "
-                        f"({definition.get('term_en', '')}): "
-                        f"{definition.get('definition_fr', '')}"
-                    ),
-                    "section_type": "definition",
-                    "context_prefix": definition.get("context_prefix"),
-                    "score": 1.0,
-                })
+                chunks.append(
+                    {
+                        "content": (
+                            f"**{definition.get('term_fr', '')}** "
+                            f"({definition.get('term_en', '')}): "
+                            f"{definition.get('definition_fr', '')}"
+                        ),
+                        "section_type": "definition",
+                        "context_prefix": definition.get("context_prefix"),
+                        "score": 1.0,
+                    }
+                )
 
         # get_milestone_criteria : convertir le contenu en chunk
         elif tool_name == "get_milestone_criteria" and data.get("found"):
@@ -751,30 +759,36 @@ class GRIOrchestrator:
                         content_parts.append(f"- {criterion.get('text', '')}")
 
             if content_parts:
-                chunks.append({
-                    "content": "\n".join(content_parts),
-                    "section_type": "milestone",
-                    "milestone_id": data.get("milestone_id"),
-                    "cycle": data.get("cycle", "GRI"),
-                    "score": 1.0,
-                })
+                chunks.append(
+                    {
+                        "content": "\n".join(content_parts),
+                        "section_type": "milestone",
+                        "milestone_id": data.get("milestone_id"),
+                        "cycle": data.get("cycle", "GRI"),
+                        "score": 1.0,
+                    }
+                )
 
         # get_phase_summary : convertir en chunk
         elif tool_name == "get_phase_summary" and data.get("found"):
-            chunks.append({
-                "content": data.get("content", ""),
-                "section_type": "phase",
-                "phase_num": data.get("phase_num"),
-                "score": 1.0,
-            })
+            chunks.append(
+                {
+                    "content": data.get("content", ""),
+                    "section_type": "phase",
+                    "phase_num": data.get("phase_num"),
+                    "score": 1.0,
+                }
+            )
 
         # compare_approaches : convertir en chunk
         elif tool_name == "compare_approaches" and data.get("comparison_text"):
-            chunks.append({
-                "content": data["comparison_text"],
-                "section_type": "comparison",
-                "score": 1.0,
-            })
+            chunks.append(
+                {
+                    "content": data["comparison_text"],
+                    "section_type": "comparison",
+                    "score": 1.0,
+                }
+            )
 
         return chunks
 
@@ -787,7 +801,7 @@ class GRIOrchestrator:
         Returns:
             Liste de citations uniques
         """
-        pattern = r'\[(?:GRI|CIR)[^\]]+\]'
+        pattern = r"\[(?:GRI|CIR)[^\]]+\]"
         matches = re.findall(pattern, text)
         return list(set(matches))
 
@@ -820,15 +834,9 @@ def main() -> None:
         description="GRI Agent - Assistant IA pour le Guide de Référence d'Ingénierie"
     )
     parser.add_argument(
-        "--interactive", "-i",
-        action="store_true",
-        help="Mode interactif (boucle de questions)"
+        "--interactive", "-i", action="store_true", help="Mode interactif (boucle de questions)"
     )
-    parser.add_argument(
-        "--query", "-q",
-        type=str,
-        help="Question unique à poser"
-    )
+    parser.add_argument("--query", "-q", type=str, help="Question unique à poser")
     args = parser.parse_args()
 
     # Initialiser les composants

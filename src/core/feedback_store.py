@@ -52,9 +52,7 @@ async def save_feedback(
 
     # Try PostgreSQL if configured
     if hasattr(settings, "postgres_dsn") and settings.postgres_dsn:
-        success = await _save_to_postgres(
-            query_id, rating, comment, incorrect_info, metadata
-        )
+        success = await _save_to_postgres(query_id, rating, comment, incorrect_info, metadata)
         if success:
             return True
         log.warning("feedback.postgres_failed_fallback_to_file", query_id=query_id)
@@ -148,9 +146,7 @@ async def get_feedback_stats() -> dict[str, Any]:
         try:
             import asyncpg
 
-            pool = await asyncpg.create_pool(
-                settings.postgres_dsn, min_size=1, max_size=2
-            )
+            pool = await asyncpg.create_pool(settings.postgres_dsn, min_size=1, max_size=2)
 
             async with pool.acquire() as conn:
                 # Total and average

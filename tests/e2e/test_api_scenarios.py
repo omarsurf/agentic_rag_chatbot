@@ -21,6 +21,7 @@ class TestDefinitionScenario:
         from fastapi.testclient import TestClient
 
         from src.api.main import app
+
         return TestClient(app)
 
     def test_definition_query_format(self, client):
@@ -87,6 +88,7 @@ class TestSessionScenario:
         from fastapi.testclient import TestClient
 
         from src.api.main import app
+
         return TestClient(app)
 
     def test_session_id_preserved(self, client):
@@ -127,27 +129,34 @@ class TestFeedbackScenario:
         from fastapi.testclient import TestClient
 
         from src.api.main import app
+
         return TestClient(app)
 
     def test_positive_feedback(self, client):
         """Feedback positif."""
-        response = client.post("/feedback", json={
-            "query_id": "query-abc-123",
-            "rating": 5,
-            "comment": "Réponse très précise et bien sourcée.",
-        })
+        response = client.post(
+            "/feedback",
+            json={
+                "query_id": "query-abc-123",
+                "rating": 5,
+                "comment": "Réponse très précise et bien sourcée.",
+            },
+        )
 
         assert response.status_code == 200
         assert response.json()["success"] is True
 
     def test_negative_feedback_with_correction(self, client):
         """Feedback négatif avec correction."""
-        response = client.post("/feedback", json={
-            "query_id": "query-def-456",
-            "rating": 2,
-            "comment": "La réponse contient une erreur.",
-            "incorrect_info": "Le jalon J3 n'équivaut pas à M4, mais à M5+M6.",
-        })
+        response = client.post(
+            "/feedback",
+            json={
+                "query_id": "query-def-456",
+                "rating": 2,
+                "comment": "La réponse contient une erreur.",
+                "incorrect_info": "Le jalon J3 n'équivaut pas à M4, mais à M5+M6.",
+            },
+        )
 
         assert response.status_code == 200
 
@@ -176,6 +185,7 @@ class TestErrorScenarios:
         from fastapi.testclient import TestClient
 
         from src.api.main import app
+
         return TestClient(app)
 
     def test_query_too_short(self, client):
@@ -190,18 +200,24 @@ class TestErrorScenarios:
 
     def test_invalid_cycle(self, client):
         """Cycle invalide."""
-        response = client.post("/query", json={
-            "query": "Test question",
-            "cycle": "INVALID",
-        })
+        response = client.post(
+            "/query",
+            json={
+                "query": "Test question",
+                "cycle": "INVALID",
+            },
+        )
         assert response.status_code == 422
 
     def test_max_chunks_out_of_range(self, client):
         """max_chunks hors limites."""
-        response = client.post("/query", json={
-            "query": "Test question",
-            "max_chunks": 100,
-        })
+        response = client.post(
+            "/query",
+            json={
+                "query": "Test question",
+                "max_chunks": 100,
+            },
+        )
         assert response.status_code == 422
 
 
@@ -282,6 +298,7 @@ class TestStreamingEndpoint:
         from fastapi.testclient import TestClient
 
         from src.api.main import app
+
         return TestClient(app)
 
     def test_streaming_endpoint_returns_sse_content_type(self, client):
@@ -307,13 +324,17 @@ class TestStreamingEndpoint:
         """Vérification du format des événements SSE."""
         from src.api.streaming import format_sse_event
 
-        event = format_sse_event("routing", {
-            "intent": "JALON",
-            "cycle": "GRI",
-            "confidence": 0.95,
-        })
+        event = format_sse_event(
+            "routing",
+            {
+                "intent": "JALON",
+                "cycle": "GRI",
+                "confidence": 0.95,
+            },
+        )
 
         import json
+
         parsed = json.loads(event)
 
         assert parsed["event"] == "routing"
@@ -344,10 +365,12 @@ class TestStreamingEndpoint:
 
             with patch("src.api.streaming.GRITermExpander") as MockExpander:
                 mock_expander = MagicMock()
-                mock_expander.expand = MagicMock(return_value=MagicMock(
-                    enriched_query="test",
-                    terms_detected=[],
-                ))
+                mock_expander.expand = MagicMock(
+                    return_value=MagicMock(
+                        enriched_query="test",
+                        terms_detected=[],
+                    )
+                )
                 MockExpander.return_value = mock_expander
 
                 with patch("src.api.streaming.AsyncInferenceClient") as MockClient:
@@ -509,6 +532,7 @@ class TestSessionManagement:
         from fastapi.testclient import TestClient
 
         from src.api.main import app
+
         return TestClient(app)
 
     def test_session_creation_with_query(self, client):
@@ -530,20 +554,26 @@ class TestSessionManagement:
             mock_orch.run = AsyncMock(return_value=mock_result)
             MockOrch.return_value = mock_orch
 
-            response = client.post("/query", json={
-                "query": "Test question",
-                "session_id": "550e8400-e29b-41d4-a716-446655440002",
-            })
+            response = client.post(
+                "/query",
+                json={
+                    "query": "Test question",
+                    "session_id": "550e8400-e29b-41d4-a716-446655440002",
+                },
+            )
 
             # Le serveur doit accepter la requête (peut échouer pour d'autres raisons)
             assert response.status_code in (200, 500, 503)
 
     def test_session_id_format_validation(self, client):
         """Le session_id doit être un UUID valide."""
-        response = client.post("/query", json={
-            "query": "Test question",
-            "session_id": "not-a-valid-uuid",
-        })
+        response = client.post(
+            "/query",
+            json={
+                "query": "Test question",
+                "session_id": "not-a-valid-uuid",
+            },
+        )
 
         # Doit rejeter les UUIDs invalides (422) ou accepter si format flexible
         assert response.status_code in (200, 422, 500, 503)
@@ -616,6 +646,7 @@ class TestRateLimiting:
         from fastapi.testclient import TestClient
 
         from src.api.main import app
+
         return TestClient(app)
 
     def test_rate_limit_headers_present(self, client):

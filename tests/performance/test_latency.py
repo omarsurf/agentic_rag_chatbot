@@ -27,6 +27,7 @@ class TestAPILatency:
         from fastapi.testclient import TestClient
 
         from src.api.main import app
+
         return TestClient(app)
 
     def test_health_endpoint_latency(self, client):
@@ -65,10 +66,13 @@ class TestAPILatency:
 
         for i in range(10):
             start = time.time()
-            response = client.post("/feedback", json={
-                "query_id": f"test-{i}",
-                "rating": 5,
-            })
+            response = client.post(
+                "/feedback",
+                json={
+                    "query_id": f"test-{i}",
+                    "rating": 5,
+                },
+            )
             latency = (time.time() - start) * 1000
             latencies.append(latency)
 
@@ -227,10 +231,7 @@ class TestDataModelLatency:
                 answer="Réponse test" * 100,
                 intent="JALON",
                 cycle="GRI",
-                citations=[
-                    Citation(text=f"[GRI > M{j}]", section=f"M{j}")
-                    for j in range(5)
-                ],
+                citations=[Citation(text=f"[GRI > M{j}]", section=f"M{j}") for j in range(5)],
                 latency_ms=500.0,
                 iterations=3,
             )
@@ -314,6 +315,7 @@ class TestConcurrency:
         from fastapi.testclient import TestClient
 
         from src.api.main import app
+
         return TestClient(app)
 
     def test_concurrent_health_requests(self, client):

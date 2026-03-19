@@ -234,6 +234,7 @@ class TestSessionAPIIntegration:
         from fastapi.testclient import TestClient
 
         from src.api.main import app
+
         return TestClient(app)
 
     def test_delete_session_not_found(self, client):
@@ -250,9 +251,11 @@ class TestSessionAPIIntegration:
         mocked_store = MagicMock()
         memories = []
 
-        with patch("src.api.main._store", mocked_store), \
-             patch("src.api.main._session_store", session_store), \
-             patch("src.api.main.GRIOrchestrator") as MockOrch:
+        with (
+            patch("src.api.main._store", mocked_store),
+            patch("src.api.main._session_store", session_store),
+            patch("src.api.main.GRIOrchestrator") as MockOrch,
+        ):
             mock_result = MagicMock()
             mock_result.answer = "Réponse test"
             mock_result.citations = []
@@ -284,14 +287,20 @@ class TestSessionAPIIntegration:
 
             MockOrch.side_effect = build_orchestrator
 
-            response1 = client.post("/query", json={
-                "query": "Première question",
-                "session_id": session_id,
-            })
-            response2 = client.post("/query", json={
-                "query": "Deuxième question",
-                "session_id": session_id,
-            })
+            response1 = client.post(
+                "/query",
+                json={
+                    "query": "Première question",
+                    "session_id": session_id,
+                },
+            )
+            response2 = client.post(
+                "/query",
+                json={
+                    "query": "Deuxième question",
+                    "session_id": session_id,
+                },
+            )
 
         assert response1.status_code == 200
         assert response2.status_code == 200

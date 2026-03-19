@@ -489,16 +489,18 @@ class TestSearchPerformance:
         # Générer 500 chunks de test
         chunks = []
         for i in range(500):
-            chunks.append({
-                "content": f"[GRI > Phase {i % 7 + 1}] Contenu de test numéro {i} "
-                f"avec des termes variés comme artefact, vérification, système.",
-                "chunk_id": f"perf_chunk_{i:04d}",
-                "metadata": {
-                    "section_type": ["definition", "milestone", "process"][i % 3],
-                    "cycle": "GRI",
-                    "phase_num": i % 7 + 1,
-                },
-            })
+            chunks.append(
+                {
+                    "content": f"[GRI > Phase {i % 7 + 1}] Contenu de test numéro {i} "
+                    f"avec des termes variés comme artefact, vérification, système.",
+                    "chunk_id": f"perf_chunk_{i:04d}",
+                    "metadata": {
+                        "section_type": ["definition", "milestone", "process"][i % 3],
+                        "cycle": "GRI",
+                        "phase_num": i % 7 + 1,
+                    },
+                }
+            )
 
         await store.index_chunks(chunks, collection="main")
         yield store

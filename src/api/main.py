@@ -163,13 +163,14 @@ class TimeoutMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         try:
-            return await asyncio.wait_for(
-                call_next(request), timeout=self.timeout
-            )
+            return await asyncio.wait_for(call_next(request), timeout=self.timeout)
         except TimeoutError:
             return JSONResponse(
                 status_code=504,
-                content={"error": "Gateway Timeout", "detail": f"Request timeout after {self.timeout}s"},
+                content={
+                    "error": "Gateway Timeout",
+                    "detail": f"Request timeout after {self.timeout}s",
+                },
             )
 
 
@@ -207,9 +208,7 @@ app.add_middleware(TimeoutMiddleware, timeout_seconds=60)
 
 # CORS configuration - parse allowed origins from config
 _cors_origins = [
-    origin.strip()
-    for origin in settings.cors_allowed_origins.split(",")
-    if origin.strip()
+    origin.strip() for origin in settings.cors_allowed_origins.split(",") if origin.strip()
 ]
 # Security: cannot use credentials with wildcard origins
 _allow_credentials = "*" not in _cors_origins
@@ -316,9 +315,7 @@ async def health():
         try:
             # Vérifier Qdrant
             stats = await _store.get_collection_stats()
-            collections = {
-                name: info.get("vectors_count", 0) for name, info in stats.items()
-            }
+            collections = {name: info.get("vectors_count", 0) for name, info in stats.items()}
             qdrant_connected = True
         except Exception as e:
             log.warning("health.qdrant_check_failed", error=str(e))
@@ -425,9 +422,7 @@ async def query(
     query_id = str(uuid.uuid4())
 
     # Convertir les citations
-    citations = [
-        Citation(text=c, section=c.strip("[]")) for c in result.citations
-    ]
+    citations = [Citation(text=c, section=c.strip("[]")) for c in result.citations]
 
     # Récupérer les sources si demandé
     sources = None
@@ -439,11 +434,12 @@ async def query(
                 section_type=chunk.get("section_type", "unknown"),
                 score=chunk.get("score", 0.0),
                 metadata={
-                    k: v for k, v in chunk.items()
+                    k: v
+                    for k, v in chunk.items()
                     if k not in ("content", "section_type", "score", "chunk_id")
                 },
             )
-            for idx, chunk in enumerate(result.collected_chunks[:query_request.max_chunks])
+            for idx, chunk in enumerate(result.collected_chunks[: query_request.max_chunks])
         ]
 
     # Convertir les tool calls
@@ -622,6 +618,7 @@ instrumentator.instrument(app)
 async def metrics(_token: str | None = Depends(verify_token)):
     """Expose les métriques Prometheus."""
     from starlette.responses import Response
+
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 

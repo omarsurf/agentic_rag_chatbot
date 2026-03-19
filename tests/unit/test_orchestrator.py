@@ -54,11 +54,11 @@ class TestToolCallParsing:
 
     def test_parse_valid_tool_call(self, orchestrator):
         """Teste le parsing d'un appel de tool valide."""
-        response = '''Voici mon analyse.
+        response = """Voici mon analyse.
 
 ```json
 {"tool_calls": [{"name": "retrieve_gri_chunks", "input": {"query": "processus"}}]}
-```'''
+```"""
 
         tool_calls = orchestrator._parse_tool_calls(response)
 
@@ -68,10 +68,10 @@ class TestToolCallParsing:
 
     def test_parse_multiple_tool_calls(self, orchestrator):
         """Teste le parsing de plusieurs appels de tools."""
-        response = '''{"tool_calls": [
+        response = """{"tool_calls": [
             {"name": "lookup_gri_glossary", "input": {"term": "artefact"}},
             {"name": "retrieve_gri_chunks", "input": {"query": "artefact usage"}}
-        ]}'''
+        ]}"""
 
         tool_calls = orchestrator._parse_tool_calls(response)
 
@@ -286,9 +286,7 @@ class TestResponseFormatting:
         """Teste le formatage des résultats de tools."""
         from src.tools.executor import ToolResult
 
-        tool_calls = [
-            ToolCall(name="retrieve_gri_chunks", input={"query": "test"})
-        ]
+        tool_calls = [ToolCall(name="retrieve_gri_chunks", input={"query": "test"})]
         results = [
             ToolResult(
                 tool_name="retrieve_gri_chunks",
@@ -321,30 +319,36 @@ class TestOrchestratorIntegration:
         from src.agents.orchestrator import GRIOrchestrator
 
         mock_store = MagicMock()
-        mock_store.hybrid_search = AsyncMock(return_value=[
-            MagicMock(
-                id="chunk_001",
-                content="[GRI > Jalon M4] Critères du CDR : validation architecture",
-                score=0.95,
-                section_type="milestone",
-                milestone_id="M4",
+        mock_store.hybrid_search = AsyncMock(
+            return_value=[
+                MagicMock(
+                    id="chunk_001",
+                    content="[GRI > Jalon M4] Critères du CDR : validation architecture",
+                    score=0.95,
+                    section_type="milestone",
+                    milestone_id="M4",
+                )
+            ]
+        )
+        mock_store.glossary_lookup = AsyncMock(
+            return_value=MagicMock(
+                content="artefact : Produit d'ingénierie",
+                score=1.0,
             )
-        ])
-        mock_store.glossary_lookup = AsyncMock(return_value=MagicMock(
-            content="artefact : Produit d'ingénierie",
-            score=1.0,
-        ))
+        )
 
         with patch("src.agents.orchestrator.AsyncInferenceClient") as MockClient:
             mock_client = MagicMock()
-            mock_client.text_generation = AsyncMock(return_value="""
+            mock_client.text_generation = AsyncMock(
+                return_value="""
 Voici les critères du CDR (M4) :
 
 1. Architecture système validée
 2. Interfaces définies
 
 [Source: GRI > Jalon M4 (CDR)]
-""")
+"""
+            )
             MockClient.return_value = mock_client
 
             orchestrator = GRIOrchestrator(store=mock_store)
@@ -365,13 +369,15 @@ Voici les critères du CDR (M4) :
         )
 
         # Mock le routing pour retourner JALON
-        mock_orchestrator.router.route = AsyncMock(return_value=RoutingResult(
-            intent=GRIIntent.JALON,
-            cycle=GRICycle.GRI,
-            confidence=0.95,
-            entities=["M4", "CDR"],
-            strategy=ROUTING_TABLE[GRIIntent.JALON],
-        ))
+        mock_orchestrator.router.route = AsyncMock(
+            return_value=RoutingResult(
+                intent=GRIIntent.JALON,
+                cycle=GRICycle.GRI,
+                confidence=0.95,
+                entities=["M4", "CDR"],
+                strategy=ROUTING_TABLE[GRIIntent.JALON],
+            )
+        )
 
         # Le test vérifie que l'orchestrateur est bien configuré
         assert mock_orchestrator.store is not None
@@ -393,13 +399,15 @@ Voici les critères du CDR (M4) :
         )
 
         # Mock le routing pour retourner DEFINITION
-        mock_orchestrator.router.route = AsyncMock(return_value=RoutingResult(
-            intent=GRIIntent.DEFINITION,
-            cycle=GRICycle.GRI,
-            confidence=0.95,
-            entities=["artefact"],
-            strategy=ROUTING_TABLE[GRIIntent.DEFINITION],
-        ))
+        mock_orchestrator.router.route = AsyncMock(
+            return_value=RoutingResult(
+                intent=GRIIntent.DEFINITION,
+                cycle=GRICycle.GRI,
+                confidence=0.95,
+                entities=["artefact"],
+                strategy=ROUTING_TABLE[GRIIntent.DEFINITION],
+            )
+        )
 
         # Vérifier que le routing fonctionne
         routing = await mock_orchestrator.router.route("Qu'est-ce qu'un artefact ?")

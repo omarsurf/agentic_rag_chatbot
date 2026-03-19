@@ -206,13 +206,9 @@ class GRIChunk(BaseModel):
 
     def model_post_init(self, __context) -> None:
         """Valider que le contenu commence par le prefix."""
-        if not (
-            self.content.startswith("[GRI")
-            or self.content.startswith("[CIR")
-        ):
+        if not (self.content.startswith("[GRI") or self.content.startswith("[CIR")):
             raise ValueError(
-                f"Le chunk doit commencer par [GRI ou [CIR, "
-                f"reçu: {self.content[:50]}..."
+                f"Le chunk doit commencer par [GRI ou [CIR, " f"reçu: {self.content[:50]}..."
             )
 
     @property
@@ -346,10 +342,9 @@ class ParsedTable(BaseModel):
         normalized: list[dict[str, str]] = []
         for row in v:
             if isinstance(row, list):
-                normalized.append({
-                    header: str(value)
-                    for header, value in zip(headers, row, strict=False)
-                })
+                normalized.append(
+                    {header: str(value) for header, value in zip(headers, row, strict=False)}
+                )
             else:
                 normalized.append({"value": str(row)})
         return normalized

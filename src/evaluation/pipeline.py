@@ -260,9 +260,17 @@ class GRIEvaluator:
                 response = await self.rag_system.run(query)
                 latency_ms = (time.time() - start) * 1000
 
-                answer = response.answer if hasattr(response, "answer") else str(response.get("answer", ""))
-                actual_intent = response.intent if hasattr(response, "intent") else response.get("intent")
-                actual_cycle = response.cycle if hasattr(response, "cycle") else response.get("cycle")
+                answer = (
+                    response.answer
+                    if hasattr(response, "answer")
+                    else str(response.get("answer", ""))
+                )
+                actual_intent = (
+                    response.intent if hasattr(response, "intent") else response.get("intent")
+                )
+                actual_cycle = (
+                    response.cycle if hasattr(response, "cycle") else response.get("cycle")
+                )
                 n_tool_calls = len(response.tool_calls) if hasattr(response, "tool_calls") else 0
                 iterations = response.iterations if hasattr(response, "iterations") else 0
 
@@ -304,9 +312,7 @@ class GRIEvaluator:
                     query, ground_truth, chunks_used, self.client
                 )
 
-            precision_result = await compute_context_precision(
-                query, chunks_used, self.client
-            )
+            precision_result = await compute_context_precision(query, chunks_used, self.client)
 
         if answer and self.store is not None:
             term_result = await compute_term_accuracy(answer, self.store, self.client)
@@ -379,6 +385,7 @@ class GRIEvaluator:
 
         if item.get("critical_check") == "all_criteria_listed":
             import re
+
             criteria = re.findall(r"^\s*[-•\d]+[.)]", answer, re.MULTILINE)
             return len(criteria) >= 3
 
@@ -450,7 +457,8 @@ class GRIEvaluator:
             latency_max=float(np.max(latencies)) if latencies else 0.0,
             intent_accuracy=sum(r.intent_correct for r in valid_results) / len(valid_results),
             cycle_accuracy=sum(r.cycle_correct for r in valid_results) / len(valid_results),
-            milestone_completeness=sum(r.milestone_complete for r in valid_results) / len(valid_results),
+            milestone_completeness=sum(r.milestone_complete for r in valid_results)
+            / len(valid_results),
         )
 
     def _check_quality_gates(self, summary: EvaluationSummary) -> list[str]:
@@ -586,9 +594,7 @@ async def main_async(args: argparse.Namespace) -> None:
 
 def main() -> None:
     """Point d'entrée CLI."""
-    parser = argparse.ArgumentParser(
-        description="Évaluation du système RAG GRI"
-    )
+    parser = argparse.ArgumentParser(description="Évaluation du système RAG GRI")
     parser.add_argument(
         "--dataset",
         type=str,

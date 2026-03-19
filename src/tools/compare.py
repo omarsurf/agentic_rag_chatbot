@@ -96,9 +96,7 @@ async def compare_approaches(
     )
 
     # Construire le contexte combiné
-    combined_context = _build_combined_context(
-        results_a, results_b, comparison_dimensions
-    )
+    combined_context = _build_combined_context(results_a, results_b, comparison_dimensions)
 
     # Extraire les citations
     citations = _extract_citations(results_a, results_b)
@@ -149,6 +147,7 @@ async def _retrieve_entity_info(
     # Déterminer si c'est une phase
     phase_num = None
     import re
+
     phase_match = re.search(r"phase\s+(\d+)", entity_lower)
     if phase_match:
         phase_num = int(phase_match.group(1))

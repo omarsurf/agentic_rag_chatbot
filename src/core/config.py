@@ -221,15 +221,15 @@ CIR_PHASES = range(1, 5)  # 1-4
 # Mapping des acronymes de revue vers les IDs de jalons
 # Utilisé par l'extraction (ingestion) et la validation (retrieval)
 MILESTONE_ACRONYM_TO_ID: dict[str, str] = {
-    "ASR": "M0",   # Advance Study Review
-    "MNS": "M0",   # Mission Needs Statement
-    "SRR": "M1",   # System Requirements Review
-    "SFR": "M2",   # System Functional Review
-    "PDR": "M2",   # Preliminary Design Review (alias SFR)
-    "CDR": "M3",   # Critical Design Review
-    "IRR": "M4",   # Integration Readiness Review
-    "TRR": "M5",   # Test Readiness Review
-    "SAR": "M6",   # System Acceptance Review
-    "ORR": "M7",   # Operational Readiness Review
-    "MNR": "M8",   # Mission Needs Review
+    "ASR": "M0",  # Advance Study Review
+    "MNS": "M0",  # Mission Needs Statement
+    "SRR": "M1",  # System Requirements Review
+    "SFR": "M2",  # System Functional Review
+    "PDR": "M2",  # Preliminary Design Review (alias SFR)
+    "CDR": "M3",  # Critical Design Review
+    "IRR": "M4",  # Integration Readiness Review
+    "TRR": "M5",  # Test Readiness Review
+    "SAR": "M6",  # System Acceptance Review
+    "ORR": "M7",  # Operational Readiness Review
+    "MNR": "M8",  # Mission Needs Review
 }

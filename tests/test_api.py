@@ -25,10 +25,12 @@ def client():
 def mock_store():
     """Mock du vector store."""
     store = MagicMock()
-    store.get_collection_stats = AsyncMock(return_value={
-        "main": {"vectors_count": 1000, "status": "green"},
-        "glossary": {"vectors_count": 200, "status": "green"},
-    })
+    store.get_collection_stats = AsyncMock(
+        return_value={
+            "main": {"vectors_count": 1000, "status": "green"},
+            "glossary": {"vectors_count": 200, "status": "green"},
+        }
+    )
     store.hybrid_search = AsyncMock(return_value=[])
     store.glossary_lookup = AsyncMock(return_value=None)
     return store
@@ -38,13 +40,19 @@ def mock_store():
 def mock_orchestrator_result():
     """Résultat mock de l'orchestrateur."""
     from src.agents.orchestrator import OrchestratorResult
+
     return OrchestratorResult(
         answer="Les critères du CDR sont...",
         intent="JALON",
         cycle="GRI",
         citations=["[GRI > Jalon M4 (CDR) > Critères]"],
         tool_calls=[
-            {"tool": "get_milestone_criteria", "input": {"milestone_id": "M4"}, "iteration": 1, "success": True}
+            {
+                "tool": "get_milestone_criteria",
+                "input": {"milestone_id": "M4"},
+                "iteration": 1,
+                "success": True,
+            }
         ],
         iterations=1,
         latency_ms=500.0,
@@ -185,35 +193,47 @@ class TestQueryEndpoint:
         """La query accepte le paramètre cycle."""
         # Ce test vérifie juste la validation du modèle
         # La vraie exécution nécessite un store initialisé
-        response = client.post("/query", json={
-            "query": "Test question",
-            "cycle": "GRI",
-        })
+        response = client.post(
+            "/query",
+            json={
+                "query": "Test question",
+                "cycle": "GRI",
+            },
+        )
         # 503 car pas de store, mais le modèle est validé
         assert response.status_code in [200, 500, 503]
 
     def test_query_accepts_include_sources(self, client):
         """La query accepte include_sources."""
-        response = client.post("/query", json={
-            "query": "Test question",
-            "include_sources": True,
-        })
+        response = client.post(
+            "/query",
+            json={
+                "query": "Test question",
+                "include_sources": True,
+            },
+        )
         assert response.status_code in [200, 500, 503]
 
     def test_query_accepts_max_chunks(self, client):
         """La query accepte max_chunks."""
-        response = client.post("/query", json={
-            "query": "Test question",
-            "max_chunks": 10,
-        })
+        response = client.post(
+            "/query",
+            json={
+                "query": "Test question",
+                "max_chunks": 10,
+            },
+        )
         assert response.status_code in [200, 500, 503]
 
     def test_query_max_chunks_validation(self, client):
         """max_chunks doit être entre 1 et 20."""
-        response = client.post("/query", json={
-            "query": "Test question",
-            "max_chunks": 25,
-        })
+        response = client.post(
+            "/query",
+            json={
+                "query": "Test question",
+                "max_chunks": 25,
+            },
+        )
         assert response.status_code == 422
 
 
@@ -241,19 +261,25 @@ class TestFeedbackEndpoint:
 
     def test_feedback_rating_validation(self, client):
         """Le rating doit être entre 1 et 5."""
-        response = client.post("/feedback", json={
-            "query_id": "test-123",
-            "rating": 10,
-        })
+        response = client.post(
+            "/feedback",
+            json={
+                "query_id": "test-123",
+                "rating": 10,
+            },
+        )
         assert response.status_code == 422
 
     def test_feedback_success(self, client):
         """Un feedback valide est accepté."""
-        response = client.post("/feedback", json={
-            "query_id": "test-123",
-            "rating": 4,
-            "comment": "Bonne réponse",
-        })
+        response = client.post(
+            "/feedback",
+            json={
+                "query_id": "test-123",
+                "rating": 4,
+                "comment": "Bonne réponse",
+            },
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["success"] is True

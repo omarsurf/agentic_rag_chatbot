@@ -305,9 +305,7 @@ class TestPipelineIntegration:
         """Le pipeline exécute toutes les étapes."""
         mock_parse.return_value = (sample_sections, sample_tables)
         mock_tables.return_value = sample_tables
-        mock_glossary.return_value = [
-            {"term_fr": "artefact", "definition": "Produit d'ingénierie"}
-        ]
+        mock_glossary.return_value = [{"term_fr": "artefact", "definition": "Produit d'ingénierie"}]
 
         # Créer un fichier DOCX temporaire vide pour le test
         with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as f:
@@ -431,9 +429,7 @@ class TestPipelineEndToEnd:
         result = pipeline.run(real_gri_path)
 
         # Filtrer les chunks de type jalon
-        milestone_chunks = [
-            c for c in result.chunks if c.section_type == SectionType.MILESTONE
-        ]
+        milestone_chunks = [c for c in result.chunks if c.section_type == SectionType.MILESTONE]
 
         # Chaque jalon doit être un chunk unique (non fragmenté)
         milestone_ids = set()
@@ -453,9 +449,7 @@ class TestPipelineEndToEnd:
         result = pipeline.run(real_gri_path)
 
         # Filtrer les définitions
-        definitions = [
-            c for c in result.chunks if c.section_type == SectionType.DEFINITION
-        ]
+        definitions = [c for c in result.chunks if c.section_type == SectionType.DEFINITION]
 
         # Le GRI contient 200+ définitions ISO
         assert len(definitions) >= 10  # Au minimum quelques définitions

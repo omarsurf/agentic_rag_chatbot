@@ -25,10 +25,12 @@ class TestIngestionToRetrieval:
         store.index_chunks = AsyncMock(return_value={"total": 100, "indexed": 100})
         store.hybrid_search = AsyncMock(return_value=[])
         store.glossary_lookup = AsyncMock(return_value=None)
-        store.get_collection_stats = AsyncMock(return_value={
-            "main": {"vectors_count": 1000},
-            "glossary": {"vectors_count": 200},
-        })
+        store.get_collection_stats = AsyncMock(
+            return_value={
+                "main": {"vectors_count": 1000},
+                "glossary": {"vectors_count": 200},
+            }
+        )
         return store
 
     @pytest.mark.asyncio
@@ -180,6 +182,7 @@ class TestAPIEndToEnd:
         from fastapi.testclient import TestClient
 
         from src.api.main import app
+
         return TestClient(app)
 
     def test_health_to_query_flow(self, client):
@@ -195,11 +198,14 @@ class TestAPIEndToEnd:
     def test_query_to_feedback_flow(self, client):
         """Flux complet : query → feedback."""
         # Le feedback fonctionne même sans query préalable
-        feedback_response = client.post("/feedback", json={
-            "query_id": "test-query-123",
-            "rating": 5,
-            "comment": "Très bonne réponse",
-        })
+        feedback_response = client.post(
+            "/feedback",
+            json={
+                "query_id": "test-query-123",
+                "rating": 5,
+                "comment": "Très bonne réponse",
+            },
+        )
 
         assert feedback_response.status_code == 200
         assert feedback_response.json()["success"] is True
@@ -267,6 +273,7 @@ class TestErrorHandling:
         from fastapi.testclient import TestClient
 
         from src.api.main import app
+
         return TestClient(app)
 
     def test_invalid_query_returns_422(self, client):
@@ -281,10 +288,13 @@ class TestErrorHandling:
 
     def test_invalid_feedback_rating_returns_422(self, client):
         """Un rating invalide retourne 422."""
-        response = client.post("/feedback", json={
-            "query_id": "test",
-            "rating": 10,  # > 5
-        })
+        response = client.post(
+            "/feedback",
+            json={
+                "query_id": "test",
+                "rating": 10,  # > 5
+            },
+        )
         assert response.status_code == 422
 
 

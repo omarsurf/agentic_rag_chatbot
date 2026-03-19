@@ -86,18 +86,14 @@ def postprocess_gri_answer(
     if response_type == GRIResponseType.DEFINITION:
         # Vérifier que c'est une définition (pas une reformulation)
         if not _looks_like_definition(answer):
-            warnings.append(
-                "La réponse ne semble pas suivre le format de définition ISO attendu."
-            )
+            warnings.append("La réponse ne semble pas suivre le format de définition ISO attendu.")
 
     elif response_type == GRIResponseType.MILESTONE:
         # Compter les critères numérotés (avec espaces possibles en début de ligne)
         criteria_count = len(re.findall(r"^\s*\d+\.", answer, re.MULTILINE))
         validation["criteria_count"] = criteria_count
         if criteria_count == 0:
-            warnings.append(
-                "Aucun critère numéroté trouvé. Format attendu : 1. [critère]"
-            )
+            warnings.append("Aucun critère numéroté trouvé. Format attendu : 1. [critère]")
 
     # 5. Ajouter les warnings à la réponse si nécessaire
     processed_answer = answer

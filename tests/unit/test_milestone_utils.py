@@ -306,6 +306,7 @@ class TestIntegrationWithChunker:
     def chunker(self):
         """Instance du chunker pour les tests."""
         from src.ingestion.chunker import GRIChunker
+
         return GRIChunker("a1b2c3d4e5f67890")  # 16 chars minimum
 
     def test_milestone_section_lowercase(self, chunker):
@@ -347,7 +348,8 @@ class TestIntegrationWithChunker:
         section = ParsedSection(
             level=4,
             title="Objectifs",
-            content="Cette revue vérifie que la conception est complète et conforme aux exigences. " * 3,
+            content="Cette revue vérifie que la conception est complète et conforme aux exigences. "
+            * 3,
             hierarchy=["GRI", "Phase 3", "Jalon M4", "Objectifs"],
             section_type=SectionType.MILESTONE,
         )

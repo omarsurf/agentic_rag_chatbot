@@ -155,13 +155,9 @@ class GRIGenerator:
 
         # Gérer le cas de comparaison
         if response_type == GRIResponseType.COMPARISON:
-            answer_result = await self._generate_comparison(
-                query, chunks, variables
-            )
+            answer_result = await self._generate_comparison(query, chunks, variables)
         else:
-            answer_result = await self._generate_standard(
-                query, chunks, response_type, variables
-            )
+            answer_result = await self._generate_standard(query, chunks, response_type, variables)
 
         latency_ms = (time.time() - start_time) * 1000
 
@@ -311,9 +307,7 @@ class GRIGenerator:
                 chunks_b.append(chunk)
 
         # Formater les contextes
-        context_a, context_b = format_comparison_context(
-            chunks_a, chunks_b, entity_a, entity_b
-        )
+        context_a, context_b = format_comparison_context(chunks_a, chunks_b, entity_a, entity_b)
 
         variables["context_a"] = truncate_context(context_a, max_chars=4000)
         variables["context_b"] = truncate_context(context_b, max_chars=4000)

@@ -93,8 +93,7 @@ class ToolExecutor:
         if tool_name not in self.TOOL_HANDLERS:
             available = get_tool_names()
             error_msg = (
-                f"Tool '{tool_name}' non reconnu. "
-                f"Tools disponibles : {', '.join(available)}"
+                f"Tool '{tool_name}' non reconnu. " f"Tools disponibles : {', '.join(available)}"
             )
             log.error("tool_executor.unknown_tool", tool=tool_name)
             return ToolResult(
@@ -206,10 +205,7 @@ async def execute_tools_parallel(
 
     executor = get_executor(store)
 
-    tasks = [
-        executor.execute(tool_name, input_data)
-        for tool_name, input_data in tool_calls
-    ]
+    tasks = [executor.execute(tool_name, input_data) for tool_name, input_data in tool_calls]
 
     results = await asyncio.gather(*tasks, return_exceptions=True)
 

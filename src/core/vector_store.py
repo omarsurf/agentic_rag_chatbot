@@ -215,12 +215,13 @@ class GRIHybridStore:
                 metadata = chunk.get("metadata", {})
 
                 # Générer l'ID si absent
-                chunk_id = chunk.get("chunk_id") or hashlib.sha256(
-                    content.encode()
-                ).hexdigest()[:16]
+                chunk_id = (
+                    chunk.get("chunk_id") or hashlib.sha256(content.encode()).hexdigest()[:16]
+                )
 
                 # Générer un UUID à partir du chunk_id (Qdrant requiert UUID ou int)
                 import uuid
+
                 point_uuid = str(uuid.uuid5(uuid.NAMESPACE_DNS, chunk_id))
 
                 # Générer l'embedding
@@ -352,9 +353,7 @@ class GRIHybridStore:
         for idx, doc in enumerate(corpus):
             if filters:
                 payload = doc["payload"]
-                match = all(
-                    payload.get(k) == v for k, v in filters.items() if v is not None
-                )
+                match = all(payload.get(k) == v for k, v in filters.items() if v is not None)
                 if not match:
                     continue
             filtered_indices.append(idx)
@@ -563,11 +562,7 @@ class GRIHybridStore:
                 results, _ = await self._async_client.scroll(
                     collection_name=self.COLLECTIONS["glossary"],
                     scroll_filter=Filter(
-                        must=[
-                            FieldCondition(
-                                key="term_fr", match=MatchText(text=term_lower)
-                            )
-                        ]
+                        must=[FieldCondition(key="term_fr", match=MatchText(text=term_lower))]
                     ),
                     limit=5,
                     with_payload=True,
@@ -576,11 +571,7 @@ class GRIHybridStore:
                 results, _ = self.client.scroll(
                     collection_name=self.COLLECTIONS["glossary"],
                     scroll_filter=Filter(
-                        must=[
-                            FieldCondition(
-                                key="term_fr", match=MatchText(text=term_lower)
-                            )
-                        ]
+                        must=[FieldCondition(key="term_fr", match=MatchText(text=term_lower))]
                     ),
                     limit=5,
                     with_payload=True,
@@ -599,11 +590,7 @@ class GRIHybridStore:
                 results, _ = await self._async_client.scroll(
                     collection_name=self.COLLECTIONS["glossary"],
                     scroll_filter=Filter(
-                        must=[
-                            FieldCondition(
-                                key="term_en", match=MatchText(text=term_lower)
-                            )
-                        ]
+                        must=[FieldCondition(key="term_en", match=MatchText(text=term_lower))]
                     ),
                     limit=5,
                     with_payload=True,
@@ -612,11 +599,7 @@ class GRIHybridStore:
                 results, _ = self.client.scroll(
                     collection_name=self.COLLECTIONS["glossary"],
                     scroll_filter=Filter(
-                        must=[
-                            FieldCondition(
-                                key="term_en", match=MatchText(text=term_lower)
-                            )
-                        ]
+                        must=[FieldCondition(key="term_en", match=MatchText(text=term_lower))]
                     ),
                     limit=5,
                     with_payload=True,
@@ -629,9 +612,7 @@ class GRIHybridStore:
             log.warning("vector_store.glossary_en_match_failed", error=str(e))
 
         # Fallback : recherche hybride sur le glossaire
-        results = await self.hybrid_search(
-            term, collection="glossary", n_results=1, alpha=0.3
-        )
+        results = await self.hybrid_search(term, collection="glossary", n_results=1, alpha=0.3)
         if not results:
             return None
 
@@ -672,17 +653,13 @@ class GRIHybridStore:
         # Scores dense
         for rank, hit in enumerate(dense_hits):
             doc_id = str(hit.id)
-            scores[doc_id] = scores.get(doc_id, 0) + alpha * (
-                1 / (self.RRF_K + rank + 1)
-            )
+            scores[doc_id] = scores.get(doc_id, 0) + alpha * (1 / (self.RRF_K + rank + 1))
             payloads[doc_id] = hit.payload
 
         # Scores sparse
         for rank, hit in enumerate(sparse_hits):
             doc_id = str(hit["id"])
-            scores[doc_id] = scores.get(doc_id, 0) + (1 - alpha) * (
-                1 / (self.RRF_K + rank + 1)
-            )
+            scores[doc_id] = scores.get(doc_id, 0) + (1 - alpha) * (1 / (self.RRF_K + rank + 1))
             if doc_id not in payloads:
                 payloads[doc_id] = hit["payload"]
 
@@ -781,9 +758,7 @@ class GRIHybridStore:
             }
         return normalized
 
-    async def delete_collection(
-        self, collection: Literal["main", "glossary"]
-    ) -> bool:
+    async def delete_collection(self, collection: Literal["main", "glossary"]) -> bool:
         """Supprime une collection.
 
         Args:

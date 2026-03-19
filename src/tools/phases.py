@@ -406,12 +406,8 @@ def format_phase_for_response(output: GetPhaseSummaryOutput) -> str:
         milestones_str = ", ".join(output.milestones)
         lines.append(f"**Jalons :** {milestones_str}")
         if output.entry_milestone and output.exit_milestone:
-            lines.append(
-                f"- Entrée : {output.entry_milestone}"
-            )
-            lines.append(
-                f"- Sortie : {output.exit_milestone}"
-            )
+            lines.append(f"- Entrée : {output.entry_milestone}")
+            lines.append(f"- Sortie : {output.exit_milestone}")
         lines.append("")
 
     # Objectifs

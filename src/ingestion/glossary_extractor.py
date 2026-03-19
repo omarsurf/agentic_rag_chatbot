@@ -89,9 +89,7 @@ class GRIGlossaryExtractor:
         entries: list[GlossaryEntry] = []
 
         # Trouver les sections de glossaire/terminologie
-        glossary_sections = [
-            s for s in sections if s.section_type == SectionType.DEFINITION
-        ]
+        glossary_sections = [s for s in sections if s.section_type == SectionType.DEFINITION]
 
         log.info(
             "gri.glossary.sections_found",
@@ -131,8 +129,7 @@ class GRIGlossaryExtractor:
         lines = text.split("\n")
         # Compter les lignes qui ressemblent à des définitions (terme : définition)
         colon_lines = sum(
-            1 for line in lines
-            if ":" in line and len(line.split(":")[0].strip()) < 50
+            1 for line in lines if ":" in line and len(line.split(":")[0].strip()) < 50
         )
         return colon_lines >= 3  # Au moins 3 lignes de type définition
 
@@ -227,12 +224,14 @@ class GRIGlossaryExtractor:
                             term_en = term_en_match.group(1)
                             term = re.sub(r"\s*\([^)]+\)", "", term).strip()
 
-                        entries.append(GlossaryEntry(
-                            term_fr=term,
-                            term_en=term_en,
-                            definition_fr=definition,
-                            standard_ref=self._extract_standard_ref(definition),
-                        ))
+                        entries.append(
+                            GlossaryEntry(
+                                term_fr=term,
+                                term_en=term_en,
+                                definition_fr=definition,
+                                standard_ref=self._extract_standard_ref(definition),
+                            )
+                        )
 
         return entries
 
@@ -257,7 +256,13 @@ class GRIGlossaryExtractor:
             else:
                 # Garder l'entrée la plus complète
                 existing = seen[key]
-                if len(entry.definition_fr) > len(existing.definition_fr) or entry.term_en and not existing.term_en or entry.standard_ref and not existing.standard_ref:
+                if (
+                    len(entry.definition_fr) > len(existing.definition_fr)
+                    or entry.term_en
+                    and not existing.term_en
+                    or entry.standard_ref
+                    and not existing.standard_ref
+                ):
                     seen[key] = entry
 
         return list(seen.values())
@@ -286,8 +291,18 @@ class GRIGlossaryExtractor:
         if len(entry.term_fr) < 50 and len(entry.definition_fr) > 50:
             # Vérifier que ça ressemble à une définition (contient des mots clés)
             def_lower = entry.definition_fr.lower()
-            definition_markers = ["est ", "sont ", "désigne", "représente", "permet",
-                                  "consiste", "défini", "process", "système", "méthode"]
+            definition_markers = [
+                "est ",
+                "sont ",
+                "désigne",
+                "représente",
+                "permet",
+                "consiste",
+                "défini",
+                "process",
+                "système",
+                "méthode",
+            ]
             if any(marker in def_lower for marker in definition_markers):
                 return True
 

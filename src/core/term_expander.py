@@ -228,9 +228,7 @@ class GRITermExpander:
                         TermDefinition(
                             term_fr=result.metadata.get("term_fr", term),
                             term_en=result.metadata.get("term_en"),
-                            definition_fr=result.metadata.get(
-                                "definition_fr", result.content
-                            ),
+                            definition_fr=result.metadata.get("definition_fr", result.content),
                             definition_en=result.metadata.get("definition_en"),
                             standard_ref=result.metadata.get("standard_ref"),
                             source=result.metadata.get("source", "GRI"),

@@ -337,7 +337,9 @@ class GRIQueryRouter:
                 if match.groups():
                     phase_num = int(match.group(1))
                     entities.append(f"Phase {phase_num}")
-                    cycle = GRICycle.CIR if phase_num <= 4 and "cir" in query_lower else GRICycle.GRI
+                    cycle = (
+                        GRICycle.CIR if phase_num <= 4 and "cir" in query_lower else GRICycle.GRI
+                    )
                 else:
                     cycle = GRICycle.GRI
                 return RoutingResult(
@@ -360,7 +362,11 @@ class GRIQueryRouter:
             # Déterminer le cycle
             has_cir = "cir" in query_lower
             has_gri = "gri" in query_lower
-            cycle = GRICycle.BOTH if (has_cir and has_gri) else (GRICycle.CIR if has_cir else GRICycle.GRI)
+            cycle = (
+                GRICycle.BOTH
+                if (has_cir and has_gri)
+                else (GRICycle.CIR if has_cir else GRICycle.GRI)
+            )
             return RoutingResult(
                 intent=GRIIntent.COMPARAISON,
                 cycle=cycle,

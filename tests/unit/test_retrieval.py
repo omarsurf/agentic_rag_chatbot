@@ -86,9 +86,7 @@ class TestQueryRouterHeuristics:
 
     def test_comparaison_intent_difference(self):
         """Différence entre X et Y → COMPARAISON."""
-        result = self.router._heuristic_route(
-            "Quelle est la différence entre le GRI et le CIR ?"
-        )
+        result = self.router._heuristic_route("Quelle est la différence entre le GRI et le CIR ?")
         assert result.intent == GRIIntent.COMPARAISON
         assert result.cycle == GRICycle.BOTH
 
@@ -99,9 +97,7 @@ class TestQueryRouterHeuristics:
 
     def test_cir_intent(self):
         """Question CIR spécifique."""
-        result = self.router._heuristic_route(
-            "Dans quel contexte utilise-t-on le CIR ?"
-        )
+        result = self.router._heuristic_route("Dans quel contexte utilise-t-on le CIR ?")
         assert result.intent == GRIIntent.CIR
         assert result.cycle == GRICycle.CIR
 

@@ -93,11 +93,14 @@ async def stream_query_response(
 
         yield {
             "event": "routing",
-            "data": format_sse_event("routing", {
-                "intent": routing.intent.value,
-                "cycle": routing.cycle.value,
-                "confidence": routing.confidence,
-            }),
+            "data": format_sse_event(
+                "routing",
+                {
+                    "intent": routing.intent.value,
+                    "cycle": routing.cycle.value,
+                    "confidence": routing.confidence,
+                },
+            ),
         }
 
         # === Étape 2: Term Expansion ===
@@ -147,10 +150,13 @@ async def stream_query_response(
                 log.error("streaming.llm_error", error=error_msg)
                 yield {
                     "event": "error",
-                    "data": format_sse_event("error", {
-                        "error": "LLMError",
-                        "message": error_msg,
-                    }),
+                    "data": format_sse_event(
+                        "error",
+                        {
+                            "error": "LLMError",
+                            "message": error_msg,
+                        },
+                    ),
                 }
                 return
 
@@ -163,10 +169,13 @@ async def stream_query_response(
                 if collected_chunks:
                     yield {
                         "event": "generating",
-                        "data": format_sse_event("generating", {
-                            "status": "Génération de la réponse grounded...",
-                            "n_chunks": len(collected_chunks),
-                        }),
+                        "data": format_sse_event(
+                            "generating",
+                            {
+                                "status": "Génération de la réponse grounded...",
+                                "n_chunks": len(collected_chunks),
+                            },
+                        ),
                     }
 
                     gen_result = await generator.generate(
@@ -201,11 +210,14 @@ async def stream_query_response(
                 # Émettre l'événement tool_call
                 yield {
                     "event": "tool_call",
-                    "data": format_sse_event("tool_call", {
-                        "tool": tc["name"],
-                        "input": tc["input"],
-                        "iteration": iterations,
-                    }),
+                    "data": format_sse_event(
+                        "tool_call",
+                        {
+                            "tool": tc["name"],
+                            "input": tc["input"],
+                            "iteration": iterations,
+                        },
+                    ),
                 }
 
                 # Exécuter le tool UNE SEULE FOIS
@@ -215,19 +227,28 @@ async def stream_query_response(
                 # Émettre l'événement tool_result
                 yield {
                     "event": "tool_result",
-                    "data": format_sse_event("tool_result", {
-                        "tool": tc["name"],
-                        "success": result.success,
-                        "n_results": len(result.result.get("chunks", [])) if isinstance(result.result, dict) else 1,
-                    }),
+                    "data": format_sse_event(
+                        "tool_result",
+                        {
+                            "tool": tc["name"],
+                            "success": result.success,
+                            "n_results": (
+                                len(result.result.get("chunks", []))
+                                if isinstance(result.result, dict)
+                                else 1
+                            ),
+                        },
+                    ),
                 }
 
-                tool_calls_history.append({
-                    "tool": tc["name"],
-                    "input": tc["input"],
-                    "iteration": iterations,
-                    "success": result.success,
-                })
+                tool_calls_history.append(
+                    {
+                        "tool": tc["name"],
+                        "input": tc["input"],
+                        "iteration": iterations,
+                        "success": result.success,
+                    }
+                )
 
                 # Collecter les chunks pour GRIGenerator
                 if result.success:
@@ -239,10 +260,12 @@ async def stream_query_response(
 
             # Formater les résultats des tools (réutiliser les résultats déjà exécutés)
             tool_results_text = _format_tool_results_from_cache(tool_calls, iteration_results)
-            messages.append({
-                "role": "user",
-                "content": f"Résultats des outils :\n\n{tool_results_text}",
-            })
+            messages.append(
+                {
+                    "role": "user",
+                    "content": f"Résultats des outils :\n\n{tool_results_text}",
+                }
+            )
 
         # Si max_iter atteint sans réponse
         if not final_answer:
@@ -320,10 +343,13 @@ async def stream_query_response(
         log.error("streaming.error", error=str(e), exc_info=True)
         yield {
             "event": "error",
-            "data": format_sse_event("error", {
-                "error": e.__class__.__name__,
-                "message": str(e),
-            }),
+            "data": format_sse_event(
+                "error",
+                {
+                    "error": e.__class__.__name__,
+                    "message": str(e),
+                },
+            ),
         }
 
 
@@ -444,6 +470,7 @@ def _parse_tool_calls(response: str) -> list[dict[str, Any]]:
 
     try:
         import json
+
         json_str = cleaned[brace_idx:end_idx]
         data = json.loads(json_str)
         return data.get("tool_calls", [])
@@ -502,7 +529,7 @@ def _split_into_chunks(text: str, chunk_size: int = 100) -> list[str]:
 
 def _extract_citations(text: str) -> list[str]:
     """Extrait les citations du format [GRI/CIR > ...]."""
-    pattern = r'\[(?:GRI|CIR)[^\]]+\]'
+    pattern = r"\[(?:GRI|CIR)[^\]]+\]"
     matches = re.findall(pattern, text)
     return list(set(matches))
 
@@ -548,16 +575,18 @@ def _extract_context_from_tool_result(
     elif tool_name == "lookup_gri_glossary" and data.get("found"):
         definition = data.get("definition", {})
         if definition:
-            chunks.append({
-                "content": (
-                    f"**{definition.get('term_fr', '')}** "
-                    f"({definition.get('term_en', '')}): "
-                    f"{definition.get('definition_fr', '')}"
-                ),
-                "section_type": "definition",
-                "context_prefix": definition.get("context_prefix"),
-                "score": 1.0,
-            })
+            chunks.append(
+                {
+                    "content": (
+                        f"**{definition.get('term_fr', '')}** "
+                        f"({definition.get('term_en', '')}): "
+                        f"{definition.get('definition_fr', '')}"
+                    ),
+                    "section_type": "definition",
+                    "context_prefix": definition.get("context_prefix"),
+                    "score": 1.0,
+                }
+            )
 
     # get_milestone_criteria : convertir le contenu en chunk
     elif tool_name == "get_milestone_criteria" and data.get("found"):
@@ -569,18 +598,22 @@ def _extract_context_from_tool_result(
         if data.get("criteria"):
             for criterion in data["criteria"]:
                 if isinstance(criterion, dict):
-                    content_parts.append(f"- {criterion.get('id', '')}: {criterion.get('text', '')}")
+                    content_parts.append(
+                        f"- {criterion.get('id', '')}: {criterion.get('text', '')}"
+                    )
                 else:
                     content_parts.append(f"- {criterion}")
 
         if content_parts:
-            chunks.append({
-                "content": "\n".join(content_parts),
-                "section_type": "milestone",
-                "milestone_id": data.get("milestone_id"),
-                "cycle": data.get("cycle"),
-                "score": 1.0,
-            })
+            chunks.append(
+                {
+                    "content": "\n".join(content_parts),
+                    "section_type": "milestone",
+                    "milestone_id": data.get("milestone_id"),
+                    "cycle": data.get("cycle"),
+                    "score": 1.0,
+                }
+            )
 
     # get_phase_description : convertir en chunk
     elif tool_name == "get_phase_description" and data.get("found"):
@@ -595,27 +628,33 @@ def _extract_context_from_tool_result(
                 content_parts.append(f"- {activity}")
 
         if content_parts:
-            chunks.append({
-                "content": "\n".join(content_parts),
-                "section_type": "phase",
-                "phase_id": data.get("phase_id"),
-                "cycle": data.get("cycle"),
-                "score": 1.0,
-            })
+            chunks.append(
+                {
+                    "content": "\n".join(content_parts),
+                    "section_type": "phase",
+                    "phase_id": data.get("phase_id"),
+                    "cycle": data.get("cycle"),
+                    "score": 1.0,
+                }
+            )
 
     # compare_gri_cir : convertir en chunks de comparaison
     elif tool_name == "compare_gri_cir" and data.get("found"):
         if data.get("gri_content"):
-            chunks.append({
-                "content": data["gri_content"],
-                "section_type": "comparison_gri",
-                "score": 1.0,
-            })
+            chunks.append(
+                {
+                    "content": data["gri_content"],
+                    "section_type": "comparison_gri",
+                    "score": 1.0,
+                }
+            )
         if data.get("cir_content"):
-            chunks.append({
-                "content": data["cir_content"],
-                "section_type": "comparison_cir",
-                "score": 1.0,
-            })
+            chunks.append(
+                {
+                    "content": data["cir_content"],
+                    "section_type": "comparison_cir",
+                    "score": 1.0,
+                }
+            )
 
     return chunks

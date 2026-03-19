@@ -193,9 +193,7 @@ class GRIMilestoneRetriever:
 
             if gri_equivalents:
                 # Récupérer tous les jalons GRI en parallèle
-                tasks = [
-                    self._fetch_milestone_chunks(gri_id) for gri_id in gri_equivalents
-                ]
+                tasks = [self._fetch_milestone_chunks(gri_id) for gri_id in gri_equivalents]
                 results = await asyncio.gather(*tasks)
 
                 for gri_id, chunks in zip(gri_equivalents, results, strict=False):
