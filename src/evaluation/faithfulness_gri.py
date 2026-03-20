@@ -1,4 +1,4 @@
-"""Faithfulness GRI - Métrique adaptée au domaine GRI/FAR.
+"""Faithfulness GRI - Métrique adaptée au domaine GRI.
 
 Cette métrique évalue si les affirmations de la réponse sont
 supportées par les sources GRI, avec une attention particulière
@@ -37,9 +37,9 @@ GRI_ERROR_TYPES = [
 ]
 
 
-FAITHFULNESS_GRI_PROMPT = """Tu es un évaluateur expert en fidélité des réponses RAG pour le domaine GRI/FAR.
+FAITHFULNESS_GRI_PROMPT = """Tu es un évaluateur expert en fidélité des réponses RAG pour le domaine GRI.
 
-Évalue si cette réponse sur le GRI/FAR est factuellement supportée par les sources GRI fournies.
+Évalue si cette réponse sur le GRI est factuellement supportée par les sources GRI fournies.
 
 ## SOURCES GRI
 

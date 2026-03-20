@@ -54,7 +54,7 @@ MAX_TOKENS_MAP: dict[GRIResponseType, int] = {
 
 # === Prompts par type ===
 
-DEFINITION_PROMPT = """Fournis la définition exacte du terme "{term}" selon le GRI des FAR.
+DEFINITION_PROMPT = """Fournis la définition exacte du terme "{term}" selon le GRI.
 
 Contexte source :
 {context}
@@ -134,7 +134,7 @@ Structure de réponse :
 **Source : [GRI > Phase {phase_num} : {phase_title}]**
 """
 
-COMPARISON_PROMPT = """Compare "{entity_a}" et "{entity_b}" selon le GRI des FAR.
+COMPARISON_PROMPT = """Compare "{entity_a}" et "{entity_b}" selon le GRI.
 
 Contexte source A ({entity_a}) :
 {context_a}
@@ -184,7 +184,7 @@ Instructions :
 
 # === System prompts par type ===
 
-BASE_SYSTEM_PROMPT = """Tu es un expert en ingénierie système selon le GRI des FAR (ISO/IEC/IEEE 15288:2023).
+BASE_SYSTEM_PROMPT = """Tu es un expert en ingénierie système selon le GRI (ISO/IEC/IEEE 15288:2023).
 
 RÈGLES DE GÉNÉRATION :
 1. Utilise UNIQUEMENT les informations des SOURCES fournies

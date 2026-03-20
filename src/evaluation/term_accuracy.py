@@ -1,8 +1,7 @@
 """Term Accuracy - Métrique custom pour le GRI.
 
 Cette métrique est CRITIQUE pour le projet GRI :
-une définition ISO paraphrasée est une erreur réglementaire
-dans un contexte défense.
+une définition ISO paraphrasée est une erreur réglementaire.
 
 Seuil : ≥ 0.95
 

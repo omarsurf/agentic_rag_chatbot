@@ -24,7 +24,7 @@ log = get_logger(__name__)
 
 
 class GRIDocxParser:
-    """Parser spécialisé pour le document GRI/FAR.
+    """Parser spécialisé pour le document GRI.
 
     Préserve la hiérarchie à 7 niveaux et détecte automatiquement
     les types de sections (définition, principe, phase, jalon, etc.).

@@ -1,4 +1,4 @@
-"""Generation - Module de génération grounded pour le GRI/FAR.
+"""Generation - Module de génération grounded pour le GRI.
 
 Ce module contient les composants pour la génération de réponses :
 

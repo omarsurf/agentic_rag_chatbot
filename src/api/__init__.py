@@ -1,6 +1,6 @@
 """API FastAPI avec SSE streaming.
 
-Ce module expose l'API REST et SSE pour le système RAG GRI/FAR.
+Ce module expose l'API REST et SSE pour le système RAG GRI.
 
 Endpoints:
 - POST /query         : Query standard (JSON)

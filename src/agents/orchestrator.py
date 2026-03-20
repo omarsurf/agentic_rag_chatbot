@@ -36,8 +36,8 @@ log = structlog.get_logger()
 
 
 # System prompt de l'orchestrateur
-ORCHESTRATOR_SYSTEM = """Tu es un expert en ingénierie système et gestion de l'innovation selon le GRI des FAR.
-Sources autorisées : GRI/FAR (ISO/IEC/IEEE 15288:2023) et INCOSE Systems Engineering Handbook 5e éd.
+ORCHESTRATOR_SYSTEM = """Tu es un expert en ingénierie système et gestion de l'innovation selon le GRI.
+Sources autorisées : GRI (ISO/IEC/IEEE 15288:2023) et INCOSE Systems Engineering Handbook 5e éd.
 
 ## PROCESSUS DE RAISONNEMENT OBLIGATOIRE
 

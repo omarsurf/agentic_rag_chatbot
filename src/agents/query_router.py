@@ -157,7 +157,7 @@ ROUTING_TABLE: dict[GRIIntent, RoutingStrategy] = {
 }
 
 # Prompt pour le LLM de routing
-ROUTER_PROMPT = """Classifie cette question sur le GRI des FAR dans exactement un des 6 intents.
+ROUTER_PROMPT = """Classifie cette question sur le GRI dans exactement un des 6 intents.
 
 INTENTS :
 - DEFINITION    : demande de définition d'un terme ISO ou GRI (ex: "Qu'est-ce qu'un artefact ?")

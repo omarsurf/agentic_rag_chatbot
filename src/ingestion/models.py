@@ -56,7 +56,7 @@ class GRIMetadata(BaseModel):
         max_length=16,
     )
     source: str = Field(
-        default="GRI_FAR_2025",
+        default="GRI_2025",
         description="Identifiant de la source",
     )
     chunk_index: int = Field(

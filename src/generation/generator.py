@@ -1,4 +1,4 @@
-"""GRIGenerator - Génération de réponses grounded pour le GRI/FAR.
+"""GRIGenerator - Génération de réponses grounded pour le GRI.
 
 Ce module implémente le générateur principal avec :
 - Sélection automatique du prompt par type de contenu

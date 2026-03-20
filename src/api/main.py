@@ -1,4 +1,4 @@
-"""API FastAPI pour le système RAG GRI/FAR.
+"""API FastAPI pour le système RAG GRI.
 
 Endpoints:
 - POST /query         : Query standard (JSON response)
@@ -186,7 +186,7 @@ class TimeoutMiddleware(BaseHTTPMiddleware):
 
 app = FastAPI(
     title="GRI RAG API",
-    description="API pour interroger le Guide de Référence pour l'Innovation (GRI) des FAR",
+    description="API pour interroger le Guide de Référence pour l'Innovation (GRI)",
     version="0.1.0",
     lifespan=lifespan,
     docs_url="/docs",
