@@ -577,12 +577,22 @@ class TestToolsEndToEnd:
                 {
                     "content": "[GRI > Glossaire] artefact : Produit d'ingénierie",
                     "chunk_id": "test_gloss_001",
-                    "metadata": {"section_type": "definition", "term_fr": "artefact"},
+                    "metadata": {
+                        "section_type": "definition",
+                        "term_fr": "artefact",
+                        "cycle": "GRI",
+                        "context_prefix": "[GRI > Glossaire]",
+                    },
                 },
                 {
                     "content": "[GRI > Jalon M4] Critères du CDR : validation architecture",
                     "chunk_id": "test_milestone_001",
-                    "metadata": {"section_type": "milestone", "milestone_id": "M4"},
+                    "metadata": {
+                        "section_type": "milestone",
+                        "milestone_id": "M4",
+                        "cycle": "GRI",
+                        "context_prefix": "[GRI > Jalon M4]",
+                    },
                 },
             ]
             await store.index_chunks(test_chunks, collection="main")
