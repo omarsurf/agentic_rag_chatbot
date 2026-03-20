@@ -11,6 +11,7 @@ Orchestration:
 import hashlib
 import time
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 from src.core.logging import get_logger
 from src.ingestion.chunker import GRIChunker
@@ -21,6 +22,9 @@ from src.ingestion.models import (
 )
 from src.ingestion.parser import GRIDocxParser
 from src.ingestion.table_extractor import GRITableExtractor
+
+if TYPE_CHECKING:
+    from src.core.vector_store import GRIHybridStore
 
 log = get_logger(__name__)
 
@@ -36,7 +40,7 @@ class GRIIngestionPipeline:
 
     def __init__(
         self,
-        vector_store=None,
+        vector_store: "GRIHybridStore | None" = None,
         output_dir: str | Path | None = None,
     ) -> None:
         """Initialise le pipeline.
@@ -121,7 +125,7 @@ class GRIIngestionPipeline:
 
         # === ÉTAPE 5: Validation ===
         log.info("gri.pipeline.step", step="validation")
-        valid_chunks = []
+        valid_chunks: list[GRIChunk] = []
         invalid_count = 0
 
         for chunk in all_chunks:
@@ -212,11 +216,12 @@ class GRIIngestionPipeline:
         if not self.vector_store:
             log.warning("gri.pipeline.no_vector_store")
             return
+        store = self.vector_store
 
         import asyncio
 
         # Convertir les chunks en format dict pour le vector store
-        chunk_dicts = [
+        chunk_dicts: list[dict[str, Any]] = [
             {
                 "chunk_id": c.chunk_id,
                 "content": c.content,
@@ -232,15 +237,15 @@ class GRIIngestionPipeline:
         ]
 
         # Indexer dans Qdrant (async)
-        async def _do_index():
+        async def _do_index() -> None:
             # Créer les collections si elles n'existent pas
-            await self.vector_store.ensure_collections()
+            await store.ensure_collections()
 
             if main_chunks:
-                await self.vector_store.index_chunks(main_chunks, collection="main")
+                await store.index_chunks(main_chunks, collection="main")
                 log.info("gri.pipeline.indexed_main", count=len(main_chunks))
             if glossary_chunks:
-                await self.vector_store.index_chunks(glossary_chunks, collection="glossary")
+                await store.index_chunks(glossary_chunks, collection="glossary")
                 log.info("gri.pipeline.indexed_glossary", count=len(glossary_chunks))
 
         asyncio.run(_do_index())

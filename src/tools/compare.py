@@ -169,7 +169,7 @@ async def _retrieve_entity_info(
             alpha=0.6,
         )
 
-        chunks = [
+        chunks: list[dict[str, Any]] = [
             {
                 "content": r.content,
                 "score": r.score,
@@ -181,7 +181,7 @@ async def _retrieve_entity_info(
             for r in results
         ]
 
-        scores = [c["score"] for c in chunks]
+        scores = [float(c.get("score", 0.0)) for c in chunks]
         avg_score = sum(scores) / len(scores) if scores else 0.0
 
         # Construire un résumé
@@ -211,7 +211,7 @@ async def _retrieve_entity_info(
         )
 
 
-def _build_entity_summary(entity: str, chunks: list[dict]) -> str:
+def _build_entity_summary(entity: str, chunks: list[dict[str, Any]]) -> str:
     """Construit un résumé des chunks d'une entité.
 
     Args:
@@ -230,7 +230,7 @@ def _build_entity_summary(entity: str, chunks: list[dict]) -> str:
     if len(first_chunk["content"]) > 500:
         content_preview += "..."
 
-    return content_preview
+    return str(content_preview)
 
 
 def _build_combined_context(

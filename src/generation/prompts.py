@@ -15,6 +15,7 @@ Usage:
 """
 
 from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -248,7 +249,7 @@ PROMPT_CONFIGS: dict[GRIResponseType, PromptConfig] = {
 }
 
 
-def get_prompt(response_type: GRIResponseType, **kwargs) -> str:
+def get_prompt(response_type: GRIResponseType, **kwargs: Any) -> str:
     """Récupère le prompt formaté pour un type de réponse.
 
     Args:

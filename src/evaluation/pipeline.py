@@ -23,13 +23,20 @@ import time
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import structlog
 from huggingface_hub import AsyncInferenceClient
 
 from src.core.config import settings
+from src.evaluation.faithfulness_gri import FaithfulnessResult
+from src.evaluation.metrics import (
+    AnswerRelevanceResult,
+    ContextPrecisionResult,
+    ContextRecallResult,
+)
+from src.evaluation.term_accuracy import TermAccuracyResult
 
 log = structlog.get_logger()
 
@@ -294,17 +301,20 @@ class GRIEvaluator:
         from src.evaluation.term_accuracy import compute_term_accuracy
 
         # Exécuter les métriques en parallèle
-        faithfulness_result = None
-        relevance_result = None
-        recall_result = None
-        precision_result = None
-        term_result = None
+        faithfulness_result: FaithfulnessResult | BaseException | None = None
+        relevance_result: AnswerRelevanceResult | BaseException | None = None
+        recall_result: ContextRecallResult | BaseException | None = None
+        precision_result: ContextPrecisionResult | BaseException | None = None
+        term_result: TermAccuracyResult | BaseException | None = None
 
         if answer and chunks_used:
-            faithfulness_result, relevance_result = await asyncio.gather(
-                compute_faithfulness_gri(answer, chunks_used, self.client),
-                compute_answer_relevance(query, answer, self.client),
-                return_exceptions=True,
+            faithfulness_result, relevance_result = cast(
+                tuple[FaithfulnessResult | BaseException, AnswerRelevanceResult | BaseException],
+                await asyncio.gather(
+                    compute_faithfulness_gri(answer, chunks_used, self.client),
+                    compute_answer_relevance(query, answer, self.client),
+                    return_exceptions=True,
+                ),
             )
 
             if ground_truth:
@@ -319,26 +329,26 @@ class GRIEvaluator:
 
         # Extraire les scores
         faithfulness = 0.0
-        faithfulness_errors = []
-        if faithfulness_result and not isinstance(faithfulness_result, Exception):
+        faithfulness_errors: list[str] = []
+        if faithfulness_result is not None and not isinstance(faithfulness_result, BaseException):
             faithfulness = faithfulness_result.faithfulness_score
             faithfulness_errors = faithfulness_result.gri_specific_errors
 
         relevance = 0.0
-        if relevance_result and not isinstance(relevance_result, Exception):
+        if relevance_result is not None and not isinstance(relevance_result, BaseException):
             relevance = relevance_result.relevance_score
 
         recall = 0.0
-        if recall_result and not isinstance(recall_result, Exception):
+        if recall_result is not None and not isinstance(recall_result, BaseException):
             recall = recall_result.recall_score
 
         precision = 0.0
-        if precision_result and not isinstance(precision_result, Exception):
+        if precision_result is not None and not isinstance(precision_result, BaseException):
             precision = precision_result.precision_score
 
         term_acc = 1.0  # Défaut si pas de termes
-        term_errors = []
-        if term_result and not isinstance(term_result, Exception):
+        term_errors: list[str] = []
+        if term_result is not None and not isinstance(term_result, BaseException):
             term_acc = term_result.term_accuracy_score
             term_errors = term_result.critical_errors
 
@@ -496,7 +506,7 @@ class GRIEvaluator:
         return failures
 
 
-def load_dataset(path: str | Path) -> list[dict]:
+def load_dataset(path: str | Path) -> list[dict[str, Any]]:
     """Charge un dataset JSON.
 
     Args:
@@ -505,9 +515,11 @@ def load_dataset(path: str | Path) -> list[dict]:
     Returns:
         Liste des questions
     """
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
-    return data.get("questions", data)
+    if isinstance(data, dict):
+        return cast(list[dict[str, Any]], data.get("questions", []))
+    return cast(list[dict[str, Any]], data)
 
 
 def save_report(report: dict, path: str | Path) -> None:

@@ -8,6 +8,7 @@ Extrait la hiérarchie complète (7 niveaux) et sépare les flux :
 
 import re
 from pathlib import Path
+from typing import Any
 
 from docx import Document as DocxDocument
 from docx.document import Document
@@ -202,7 +203,7 @@ class GRIDocxParser:
             full_text="\n".join(text_parts),
         )
 
-    def _get_cell_text(self, cell) -> str:
+    def _get_cell_text(self, cell: Any) -> str:
         """Extrait le texte d'une cellule (gère les cellules fusionnées)."""
         return " ".join(p.text.strip() for p in cell.paragraphs if p.text.strip())
 

@@ -25,7 +25,7 @@ import re
 import time
 import uuid
 from collections.abc import AsyncGenerator
-from typing import Any
+from typing import Any, cast
 
 import structlog
 from huggingface_hub import AsyncInferenceClient
@@ -38,7 +38,7 @@ from src.core.term_expander import GRITermExpander
 from src.core.vector_store import GRIHybridStore
 from src.generation.generator import GRIGenerator
 from src.tools import TOOLS, format_tool_result_for_llm
-from src.tools.executor import ToolExecutor
+from src.tools.executor import ToolExecutor, ToolResult
 
 log = structlog.get_logger()
 
@@ -395,7 +395,7 @@ def _format_tools_description() -> str:
 
 
 async def _call_llm_with_fallback(
-    client,
+    client: AsyncInferenceClient,
     prompt: str,
     model: str,
 ) -> str:
@@ -418,7 +418,7 @@ async def _call_llm_with_fallback(
             max_tokens=2048,
             temperature=0.1,
         )
-        return response.choices[0].message.content
+        return response.choices[0].message.content or ""
     except Exception as e:
         log.error("streaming.llm_call_failed", error=str(e))
         raise
@@ -427,7 +427,7 @@ async def _call_llm_with_fallback(
 def _build_llm_prompt(
     system: str,
     user_query: str,
-    messages: list[dict],
+    messages: list[dict[str, str]],
 ) -> str:
     """Construit le prompt complet pour le LLM."""
     parts = [f"<s>[INST] {system}\n\nQuestion : {user_query} [/INST]"]
@@ -472,15 +472,15 @@ def _parse_tool_calls(response: str) -> list[dict[str, Any]]:
         import json
 
         json_str = cleaned[brace_idx:end_idx]
-        data = json.loads(json_str)
-        return data.get("tool_calls", [])
+        data = cast(dict[str, Any], json.loads(json_str))
+        return cast(list[dict[str, Any]], data.get("tool_calls", []))
     except (json.JSONDecodeError, KeyError):
         return []
 
 
 def _format_tool_results_from_cache(
-    tool_calls: list[dict],
-    results: list,
+    tool_calls: list[dict[str, Any]],
+    results: list[ToolResult],
 ) -> str:
     """Formate les résultats des tools pour le LLM.
 
@@ -506,9 +506,9 @@ def _format_tool_results_from_cache(
 
 def _split_into_chunks(text: str, chunk_size: int = 100) -> list[str]:
     """Divise le texte en chunks pour le streaming."""
-    chunks = []
+    chunks: list[str] = []
     words = text.split()
-    current_chunk = []
+    current_chunk: list[str] = []
     current_length = 0
 
     for word in words:

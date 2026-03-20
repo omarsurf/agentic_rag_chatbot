@@ -15,8 +15,10 @@ Usage:
 import asyncio
 import time
 import uuid
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager, suppress
 from datetime import datetime
+from typing import Any, cast
 
 import structlog
 from fastapi import Depends, FastAPI, HTTPException, Request, status
@@ -28,7 +30,9 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from sse_starlette.sse import EventSourceResponse
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.responses import Response
+from starlette.types import ASGIApp
 
 from src.agents.orchestrator import GRIOrchestrator
 from src.api.auth import is_auth_required, verify_token
@@ -107,7 +111,7 @@ async def _cleanup_expired_sessions() -> None:
 
 
 @asynccontextmanager
-async def lifespan(app_instance: FastAPI):
+async def lifespan(app_instance: FastAPI) -> AsyncIterator[None]:
     """Gestion du cycle de vie de l'application."""
     global _store, _session_store, _cleanup_task
     _ = app_instance
@@ -157,11 +161,15 @@ async def lifespan(app_instance: FastAPI):
 class TimeoutMiddleware(BaseHTTPMiddleware):
     """Middleware pour timeout des requêtes."""
 
-    def __init__(self, app, timeout_seconds: int = 60):
+    def __init__(self, app: ASGIApp, timeout_seconds: int = 60) -> None:
         super().__init__(app)
         self.timeout = timeout_seconds
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(
+        self,
+        request: Request,
+        call_next: RequestResponseEndpoint,
+    ) -> Response:
         try:
             return await asyncio.wait_for(call_next(request), timeout=self.timeout)
         except TimeoutError:
@@ -187,7 +195,13 @@ app = FastAPI(
 
 # === Rate Limiter Configuration ===
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(
+    RateLimitExceeded,
+    cast(
+        Callable[[Request, Exception], Response | Awaitable[Response]],
+        _rate_limit_exceeded_handler,
+    ),
+)
 
 # === Prometheus Instrumentation ===
 # Note: expose() est appelé à la fin du fichier après tous les endpoints
@@ -223,7 +237,7 @@ app.add_middleware(
 
 
 @app.middleware("http")
-async def log_requests(request: Request, call_next):
+async def log_requests(request: Request, call_next: RequestResponseEndpoint) -> Response:
     """Log toutes les requêtes."""
     request_id = str(uuid.uuid4())[:8]
     request.state.request_id = request_id
@@ -264,7 +278,7 @@ async def log_requests(request: Request, call_next):
 
 
 @app.exception_handler(HTTPException)
-async def http_exception_handler(request: Request, exc: HTTPException):
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
     """Handler pour les exceptions HTTP."""
     request_id = getattr(request.state, "request_id", None)
     return JSONResponse(
@@ -278,7 +292,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 
 
 @app.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception):
+async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handler pour les exceptions non gérées."""
     request_id = getattr(request.state, "request_id", None)
     log.error(
@@ -302,13 +316,13 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 
 @app.get("/health", response_model=HealthResponse, tags=["System"])
-async def health():
+async def health() -> HealthResponse:
     """Vérifie l'état de santé du service.
 
     Returns:
         HealthResponse avec le statut et les infos de connexion
     """
-    collections = {}
+    collections: dict[str, int] = {}
     qdrant_connected = False
 
     if _store is not None:
@@ -334,7 +348,7 @@ async def health():
 
 
 @app.get("/stats", response_model=StatsResponse, tags=["System"])
-async def stats(_token: str | None = Depends(verify_token)):
+async def stats(_token: str | None = Depends(verify_token)) -> StatsResponse:
     """Retourne les statistiques du système.
 
     Returns:
@@ -342,7 +356,7 @@ async def stats(_token: str | None = Depends(verify_token)):
     """
     global _query_count, _total_latency
 
-    collections = {}
+    collections: dict[str, dict[str, Any]] = {}
     total_docs = 0
 
     if _store is not None:
@@ -376,7 +390,7 @@ async def query(
     request: Request,
     query_request: QueryRequest,
     _token: str | None = Depends(verify_token),
-):
+) -> QueryResponse:
     """Exécute une question sur le système RAG GRI.
 
     Args:
@@ -474,7 +488,7 @@ async def query_stream(
     request: Request,
     query_request: QueryRequest,
     _token: str | None = Depends(verify_token),
-):
+) -> EventSourceResponse:
     """Exécute une question avec streaming SSE.
 
     Retourne un flux d'événements SSE:
@@ -514,7 +528,7 @@ async def submit_feedback(
     request: Request,
     feedback: FeedbackRequest,
     _token: str | None = Depends(verify_token),
-):
+) -> FeedbackResponse:
     """Soumet un feedback utilisateur sur une réponse.
 
     Args:
@@ -563,7 +577,7 @@ async def submit_feedback(
 async def get_feedback_statistics(
     request: Request,
     _token: str | None = Depends(verify_token),
-):
+) -> dict[str, Any]:
     """Retourne les statistiques de feedback.
 
     Args:
@@ -586,7 +600,7 @@ async def clear_session(
     request: Request,
     session_id: str,
     _token: str | None = Depends(verify_token),
-):
+) -> dict[str, str]:
     """Efface la mémoire d'une session.
 
     Args:
@@ -615,10 +629,8 @@ instrumentator.instrument(app)
 
 
 @app.get("/metrics", tags=["System"], include_in_schema=True)
-async def metrics(_token: str | None = Depends(verify_token)):
+async def metrics(_token: str | None = Depends(verify_token)) -> Response:
     """Expose les métriques Prometheus."""
-    from starlette.responses import Response
-
     return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 

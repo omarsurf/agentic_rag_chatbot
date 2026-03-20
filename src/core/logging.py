@@ -8,7 +8,7 @@ Usage:
 
 import logging
 import sys
-from typing import Any
+from typing import Any, cast
 
 import structlog
 from structlog.types import Processor
@@ -114,7 +114,7 @@ def get_logger(name: str | None = None) -> structlog.stdlib.BoundLogger:
         log.warning("gri.agent.max_iter", query="...", iterations=5)
         log.error("gri.tool.error", tool="retrieve_gri_chunks", error="timeout")
     """
-    return structlog.get_logger(name)
+    return cast(structlog.stdlib.BoundLogger, structlog.get_logger(name))
 
 
 def bind_context(**kwargs: Any) -> None:

@@ -210,9 +210,9 @@ async def execute_tools_parallel(
     results = await asyncio.gather(*tasks, return_exceptions=True)
 
     # Convertir les exceptions en ToolResult
-    processed_results = []
+    processed_results: list[ToolResult] = []
     for i, result in enumerate(results):
-        if isinstance(result, Exception):
+        if isinstance(result, BaseException):
             tool_name = tool_calls[i][0]
             processed_results.append(
                 ToolResult(
@@ -252,7 +252,7 @@ def format_tool_result_for_llm(result: ToolResult) -> str:
     return formatter(result.result)
 
 
-def _format_retrieve_result(result: dict) -> str:
+def _format_retrieve_result(result: dict[str, Any]) -> str:
     """Formate un résultat retrieve_gri_chunks."""
     lines = [f"Résultats de recherche ({result.get('n_results', 0)} chunks):"]
     lines.append(f"Score max: {result.get('max_score', 0):.2f}")
@@ -271,7 +271,7 @@ def _format_retrieve_result(result: dict) -> str:
     return "\n".join(lines)
 
 
-def _format_glossary_result(result: dict) -> str:
+def _format_glossary_result(result: dict[str, Any]) -> str:
     """Formate un résultat lookup_gri_glossary."""
     if not result.get("found"):
         alternatives = result.get("alternatives", [])
@@ -310,10 +310,10 @@ def _format_glossary_result(result: dict) -> str:
     return "\n".join(lines)
 
 
-def _format_milestone_result(result: dict) -> str:
+def _format_milestone_result(result: dict[str, Any]) -> str:
     """Formate un résultat get_milestone_criteria."""
     if not result.get("found"):
-        return result.get("content", "Jalon non trouvé.")
+        return str(result.get("content", "Jalon non trouvé."))
 
     lines = []
 
@@ -344,18 +344,18 @@ def _format_milestone_result(result: dict) -> str:
     return "\n".join(lines)
 
 
-def _format_compare_result(result: dict) -> str:
+def _format_compare_result(result: dict[str, Any]) -> str:
     """Formate un résultat compare_approaches."""
     if not result.get("has_sufficient_data"):
         return "Données insuffisantes pour la comparaison."
 
-    return result.get("combined_context", "")
+    return str(result.get("combined_context", ""))
 
 
-def _format_phase_result(result: dict) -> str:
+def _format_phase_result(result: dict[str, Any]) -> str:
     """Formate un résultat get_phase_summary."""
     if not result.get("found"):
-        return result.get("content", "Phase non trouvée.")
+        return str(result.get("content", "Phase non trouvée."))
 
     lines = []
     lines.append(f"## Phase {result.get('phase_num')} — {result.get('phase_name')}")
@@ -394,7 +394,7 @@ def _format_phase_result(result: dict) -> str:
     return "\n".join(lines)
 
 
-def _format_generic_result(result: dict) -> str:
+def _format_generic_result(result: dict[str, Any]) -> str:
     """Formate un résultat générique."""
     import json
 

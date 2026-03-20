@@ -11,7 +11,7 @@ Usage:
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import structlog
 
@@ -134,7 +134,7 @@ async def get_feedback_stats() -> dict[str, Any]:
     Returns:
         Dictionary with feedback statistics
     """
-    stats = {
+    stats: dict[str, Any] = {
         "total_feedback": 0,
         "average_rating": 0.0,
         "rating_distribution": {1: 0, 2: 0, 3: 0, 4: 0, 5: 0},
@@ -178,9 +178,9 @@ async def get_feedback_stats() -> dict[str, Any]:
             ratings = []
             with open(feedback_file) as f:
                 for line in f:
-                    entry = json.loads(line.strip())
+                    entry = cast(dict[str, Any], json.loads(line.strip()))
                     rating = entry.get("rating")
-                    if rating:
+                    if isinstance(rating, int):
                         ratings.append(rating)
                         stats["rating_distribution"][rating] = (
                             stats["rating_distribution"].get(rating, 0) + 1

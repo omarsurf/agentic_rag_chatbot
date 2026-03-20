@@ -215,7 +215,7 @@ class GRIOrchestrator:
             user_prompt = f"{conversation_context}\n\n---\nNouvelle question : {query}"
 
         # Étape 4 : Boucle ReAct
-        messages = []
+        messages: list[dict[str, str]] = []
         tool_calls_history: list[dict[str, Any]] = []
         collected_chunks: list[dict[str, Any]] = []  # Chunks collectés pour GRIGenerator
         iterations = 0
@@ -427,7 +427,7 @@ class GRIOrchestrator:
                 max_tokens=2048,
                 temperature=0.1,
             )
-            return response.choices[0].message.content
+            return response.choices[0].message.content or ""
         except Exception as e:
             log.error("orchestrator.llm_call_failed", error=str(e))
             raise
@@ -436,7 +436,7 @@ class GRIOrchestrator:
         self,
         system: str,
         user_query: str,
-        messages: list[dict],
+        messages: list[dict[str, str]],
     ) -> str:
         """Construit le prompt complet pour le LLM.
 
@@ -635,16 +635,16 @@ class GRIOrchestrator:
         """
         from src.tools.executor import ToolResult as TR
 
-        tasks = []
-        for tc in tool_calls:
-            tasks.append(self._execute_single_tool(tc))
-
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        tasks = [self._execute_single_tool(tc) for tc in tool_calls]
+        results: list[ToolResult | BaseException] = await asyncio.gather(
+            *tasks,
+            return_exceptions=True,
+        )
 
         # Convertir les exceptions
-        processed = []
+        processed: list[ToolResult] = []
         for i, result in enumerate(results):
-            if isinstance(result, Exception):
+            if isinstance(result, BaseException):
                 processed.append(
                     TR(
                         tool_name=tool_calls[i].name,

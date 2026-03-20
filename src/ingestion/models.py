@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, computed_field, field_validator
+from pydantic import BaseModel, Field, ValidationInfo, computed_field, field_validator
 
 
 class SectionType(StrEnum):
@@ -165,13 +165,13 @@ class GRIMetadata(BaseModel):
         description="ID du chunk parent (Parent Document Retriever)",
     )
 
-    @computed_field
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def token_estimate(self) -> int:
         """Estimation du nombre de tokens (chars / 4)."""
         return self.char_count // 4
 
-    def model_post_init(self, __context) -> None:
+    def model_post_init(self, __context: Any) -> None:
         """Enrichir automatiquement les métadonnées CIR."""
         if self.cycle == Cycle.CIR and self.milestone_id in CIR_GRI_MAPPING:
             self.gri_equivalent = CIR_GRI_MAPPING[self.milestone_id]
@@ -204,7 +204,7 @@ class GRIChunk(BaseModel):
         description="Métadonnées du chunk",
     )
 
-    def model_post_init(self, __context) -> None:
+    def model_post_init(self, __context: Any) -> None:
         """Valider que le contenu commence par le prefix."""
         if not (self.content.startswith("[GRI") or self.content.startswith("[CIR")):
             raise ValueError(
@@ -329,7 +329,7 @@ class ParsedTable(BaseModel):
 
     @field_validator("rows", mode="before")
     @classmethod
-    def normalize_rows(cls, v: Any, info) -> list[dict[str, str]]:
+    def normalize_rows(cls, v: Any, info: ValidationInfo) -> list[dict[str, str]]:
         """Accepte list[dict] et list[list] pour compatibilité tests/fixtures."""
         if not isinstance(v, list) or not v:
             return v

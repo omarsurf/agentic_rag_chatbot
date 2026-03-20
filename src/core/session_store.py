@@ -17,7 +17,7 @@ import json
 import time
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, cast
 
 import structlog
 
@@ -183,7 +183,7 @@ class RedisSessionStore(SessionStore):
         ttl_seconds: int | None = None,
         default_ttl: int | None = None,
     ) -> None:
-        self._redis_url = redis_url or getattr(settings, "redis_url", "")
+        self._redis_url: str = redis_url or settings.redis_url or ""
         self._ttl = default_ttl or ttl_seconds or settings.session_ttl_seconds
         self._redis: Any = None
         self._key_prefix = "gri:session:"
@@ -267,7 +267,7 @@ class RedisSessionStore(SessionStore):
             redis = await self._get_redis()
             key = f"{self._key_prefix}{session_id}"
             result = await redis.delete(key)
-            return result > 0
+            return cast(int, result) > 0
         except Exception as e:
             log.error("redis_session.delete_failed", session_id=session_id, error=str(e))
             return False
@@ -286,7 +286,7 @@ class PostgresSessionStore(SessionStore):
         ttl_seconds: int | None = None,
         default_ttl: int | None = None,
     ) -> None:
-        self._dsn = dsn or getattr(settings, "postgres_dsn", "")
+        self._dsn: str = dsn or settings.postgres_dsn or ""
         self._ttl = default_ttl or ttl_seconds or settings.session_ttl_seconds
         self._pool: Any = None
 
@@ -401,7 +401,7 @@ class PostgresSessionStore(SessionStore):
                 result = await conn.execute(
                     "DELETE FROM sessions WHERE session_id = $1", session_id
                 )
-                return "DELETE 1" in result
+                return "DELETE 1" in cast(str, result)
         except Exception as e:
             log.error("postgres_session.delete_failed", session_id=session_id, error=str(e))
             return False

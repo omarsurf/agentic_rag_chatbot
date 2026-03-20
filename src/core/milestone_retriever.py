@@ -242,7 +242,7 @@ class GRIMilestoneRetriever:
 
             chunks = []
             for point in results:
-                payload = point.payload
+                payload = point.payload or {}
                 chunks.append(
                     MilestoneChunk(
                         content=payload.get("content", ""),

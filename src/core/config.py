@@ -8,9 +8,9 @@ Usage:
 
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
-import yaml
+import yaml  # type: ignore[import-untyped]
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -186,8 +186,10 @@ class Settings(BaseSettings):
     def get_yaml_config(self) -> dict[str, Any]:
         """Charge la configuration YAML complète."""
         if self.config_path.exists():
-            with open(self.config_path) as f:
-                return yaml.safe_load(f)
+            with open(self.config_path, encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            if isinstance(data, dict):
+                return cast(dict[str, Any], data)
         return {}
 
 

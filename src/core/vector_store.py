@@ -15,7 +15,7 @@ Usage:
 import asyncio
 import hashlib
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Literal
+from typing import Any, Literal, TypedDict, cast
 
 import structlog
 from pydantic import BaseModel, Field
@@ -35,6 +35,21 @@ from sentence_transformers import SentenceTransformer
 from src.core.config import settings
 
 log = structlog.get_logger()
+
+
+class CorpusDoc(TypedDict):
+    """Document brut utilisé pour l'index BM25."""
+
+    id: str | int
+    payload: dict[str, Any]
+
+
+class SparseHit(TypedDict):
+    """Résultat sparse interne."""
+
+    id: str | int
+    score: float
+    payload: dict[str, Any]
 
 
 class SearchResult(BaseModel):
@@ -127,7 +142,7 @@ class GRIHybridStore:
 
         # Index BM25 par collection (chargé à la demande)
         self._bm25: dict[str, BM25Okapi] = {}
-        self._corpus: dict[str, list[dict]] = {}
+        self._corpus: dict[str, list[CorpusDoc]] = {}
         self._corpus_loaded: dict[str, bool] = {"main": False, "glossary": False}
         self._bm25_executor = ThreadPoolExecutor(
             max_workers=2,
@@ -184,7 +199,7 @@ class GRIHybridStore:
         chunks: list[dict[str, Any]],
         collection: Literal["main", "glossary"] = "main",
         batch_size: int = 100,
-    ) -> dict[str, int]:
+    ) -> dict[str, int | str]:
         """Indexe des chunks dans Qdrant et BM25.
 
         Args:
@@ -270,7 +285,7 @@ class GRIHybridStore:
         log.info("vector_store.loading_bm25_corpus", collection=collection_name)
 
         # Scroll tous les documents
-        all_docs = []
+        all_docs: list[CorpusDoc] = []
         offset = None
 
         while True:
@@ -286,10 +301,11 @@ class GRIHybridStore:
                 break
 
             for point in results:
+                payload = cast(dict[str, Any], point.payload or {})
                 all_docs.append(
                     {
-                        "id": point.id,
-                        "payload": point.payload,
+                        "id": cast(str | int, point.id),
+                        "payload": payload,
                     }
                 )
 
@@ -326,7 +342,7 @@ class GRIHybridStore:
         collection: str,
         n_results: int,
         filters: dict[str, Any] | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[SparseHit]:
         """Recherche BM25 sparse.
 
         Args:
@@ -348,7 +364,7 @@ class GRIHybridStore:
 
         # Appliquer les filtres si présents
         corpus = self._corpus[collection]
-        filtered_indices = []
+        filtered_indices: list[int] = []
 
         for idx, doc in enumerate(corpus):
             if filters:
@@ -362,7 +378,7 @@ class GRIHybridStore:
         scored = [(idx, scores[idx]) for idx in filtered_indices]
         scored.sort(key=lambda x: x[1], reverse=True)
 
-        results = []
+        results: list[SparseHit] = []
         for idx, score in scored[:n_results]:
             doc = corpus[idx]
             results.append(
@@ -381,7 +397,7 @@ class GRIHybridStore:
         collection: str,
         n_results: int,
         filters: dict[str, Any] | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[SparseHit]:
         """Exécute la recherche BM25 en dehors de l'event loop."""
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
@@ -446,7 +462,7 @@ class GRIHybridStore:
                 query_filter=qdrant_filter,
                 with_payload=True,
             )
-        dense_hits = dense_response.points
+        dense_hits = list(dense_response.points)
 
         # Sparse search (BM25)
         sparse_hits = await self._bm25_search_async(
@@ -559,7 +575,7 @@ class GRIHybridStore:
         # Essayer l'exact match d'abord (terme FR) - case-insensitive via scroll + filter
         try:
             if self._async_client:
-                results, _ = await self._async_client.scroll(
+                scroll_results, _ = await self._async_client.scroll(
                     collection_name=self.COLLECTIONS["glossary"],
                     scroll_filter=Filter(
                         must=[FieldCondition(key="term_fr", match=MatchText(text=term_lower))]
@@ -568,7 +584,7 @@ class GRIHybridStore:
                     with_payload=True,
                 )
             else:
-                results, _ = self.client.scroll(
+                scroll_results, _ = self.client.scroll(
                     collection_name=self.COLLECTIONS["glossary"],
                     scroll_filter=Filter(
                         must=[FieldCondition(key="term_fr", match=MatchText(text=term_lower))]
@@ -577,8 +593,8 @@ class GRIHybridStore:
                     with_payload=True,
                 )
             # Vérifier un match exact (case-insensitive)
-            for r in results:
-                payload = r.payload or {}
+            for r in scroll_results:
+                payload = cast(dict[str, Any], r.payload or {})
                 if payload.get("term_fr", "").lower() == term_lower:
                     return self._point_to_result(r)
         except Exception as e:
@@ -587,7 +603,7 @@ class GRIHybridStore:
         # Essayer l'exact match terme EN
         try:
             if self._async_client:
-                results, _ = await self._async_client.scroll(
+                scroll_results, _ = await self._async_client.scroll(
                     collection_name=self.COLLECTIONS["glossary"],
                     scroll_filter=Filter(
                         must=[FieldCondition(key="term_en", match=MatchText(text=term_lower))]
@@ -596,7 +612,7 @@ class GRIHybridStore:
                     with_payload=True,
                 )
             else:
-                results, _ = self.client.scroll(
+                scroll_results, _ = self.client.scroll(
                     collection_name=self.COLLECTIONS["glossary"],
                     scroll_filter=Filter(
                         must=[FieldCondition(key="term_en", match=MatchText(text=term_lower))]
@@ -604,19 +620,24 @@ class GRIHybridStore:
                     limit=5,
                     with_payload=True,
                 )
-            for r in results:
-                payload = r.payload or {}
+            for r in scroll_results:
+                payload = cast(dict[str, Any], r.payload or {})
                 if payload.get("term_en", "").lower() == term_lower:
                     return self._point_to_result(r)
         except Exception as e:
             log.warning("vector_store.glossary_en_match_failed", error=str(e))
 
         # Fallback : recherche hybride sur le glossaire
-        results = await self.hybrid_search(term, collection="glossary", n_results=1, alpha=0.3)
-        if not results:
+        hybrid_results = await self.hybrid_search(
+            term,
+            collection="glossary",
+            n_results=1,
+            alpha=0.3,
+        )
+        if not hybrid_results:
             return None
 
-        candidate = results[0]
+        candidate = hybrid_results[0]
         candidate_fields = [
             candidate.metadata.get("term_fr", ""),
             candidate.metadata.get("term_en", ""),
@@ -629,8 +650,8 @@ class GRIHybridStore:
 
     def _rrf_fusion(
         self,
-        dense_hits: list,
-        sparse_hits: list[dict],
+        dense_hits: list[Any],
+        sparse_hits: list[SparseHit],
         alpha: float,
         n_results: int,
     ) -> list[SearchResult]:
@@ -648,13 +669,13 @@ class GRIHybridStore:
             Liste fusionnée triée par score RRF
         """
         scores: dict[str, float] = {}
-        payloads: dict[str, dict] = {}
+        payloads: dict[str, dict[str, Any]] = {}
 
         # Scores dense
         for rank, hit in enumerate(dense_hits):
             doc_id = str(hit.id)
             scores[doc_id] = scores.get(doc_id, 0) + alpha * (1 / (self.RRF_K + rank + 1))
-            payloads[doc_id] = hit.payload
+            payloads[doc_id] = cast(dict[str, Any], hit.payload or {})
 
         # Scores sparse
         for rank, hit in enumerate(sparse_hits):
@@ -681,7 +702,7 @@ class GRIHybridStore:
             for doc_id in sorted_ids
         ]
 
-    def _build_filter(self, filters: dict[str, Any]) -> Filter:
+    def _build_filter(self, filters: dict[str, Any]) -> Filter | None:
         """Construit un filtre Qdrant à partir d'un dict.
 
         Args:
@@ -690,43 +711,45 @@ class GRIHybridStore:
         Returns:
             Filtre Qdrant
         """
-        conditions = []
+        conditions: list[FieldCondition] = []
         for key, value in filters.items():
             if value is not None:
                 conditions.append(FieldCondition(key=key, match=MatchValue(value=value)))
         return Filter(must=conditions) if conditions else None
 
-    def _hit_to_result(self, hit) -> SearchResult:
+    def _hit_to_result(self, hit: Any) -> SearchResult:
         """Convertit un hit Qdrant en SearchResult."""
+        payload = cast(dict[str, Any], hit.payload or {})
         return SearchResult(
             id=str(hit.id),
             score=hit.score,
-            content=hit.payload.get("content", ""),
-            section_type=hit.payload.get("section_type"),
-            cycle=hit.payload.get("cycle"),
-            milestone_id=hit.payload.get("milestone_id"),
-            phase_num=hit.payload.get("phase_num"),
-            context_prefix=hit.payload.get("context_prefix"),
-            metadata=hit.payload,
+            content=cast(str, payload.get("content", "")),
+            section_type=cast(str | None, payload.get("section_type")),
+            cycle=cast(str | None, payload.get("cycle")),
+            milestone_id=cast(str | None, payload.get("milestone_id")),
+            phase_num=cast(int | None, payload.get("phase_num")),
+            context_prefix=cast(str | None, payload.get("context_prefix")),
+            metadata=payload,
         )
 
-    def _point_to_result(self, point) -> SearchResult:
+    def _point_to_result(self, point: Any) -> SearchResult:
         """Convertit un point Qdrant (scroll) en SearchResult."""
+        payload = cast(dict[str, Any], point.payload or {})
         return SearchResult(
             id=str(point.id),
             score=1.0,  # Exact match
-            content=point.payload.get("content", ""),
-            section_type=point.payload.get("section_type"),
-            cycle=point.payload.get("cycle"),
-            milestone_id=point.payload.get("milestone_id"),
-            phase_num=point.payload.get("phase_num"),
-            context_prefix=point.payload.get("context_prefix"),
-            metadata=point.payload,
+            content=cast(str, payload.get("content", "")),
+            section_type=cast(str | None, payload.get("section_type")),
+            cycle=cast(str | None, payload.get("cycle")),
+            milestone_id=cast(str | None, payload.get("milestone_id")),
+            phase_num=cast(int | None, payload.get("phase_num")),
+            context_prefix=cast(str | None, payload.get("context_prefix")),
+            metadata=payload,
         )
 
     async def get_collection_stats(self) -> dict[str, Any]:
         """Retourne les statistiques des collections."""
-        stats = {}
+        stats: dict[str, dict[str, Any]] = {}
         for name, collection_name in self.COLLECTIONS.items():
             try:
                 if self._async_client:
@@ -747,7 +770,7 @@ class GRIHybridStore:
     async def get_stats(self) -> dict[str, Any]:
         """Alias de compatibilité pour les tests et l'API interne."""
         collection_stats = await self.get_collection_stats()
-        normalized = {}
+        normalized: dict[str, dict[str, Any]] = {}
         for name, info in collection_stats.items():
             count = info.get("points_count")
             if count in (None, 0):

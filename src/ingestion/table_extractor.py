@@ -5,6 +5,7 @@ Ne jamais perdre ces données.
 """
 
 from pathlib import Path
+from typing import Any
 
 from docx import Document as DocxDocument
 from docx.table import Table
@@ -138,7 +139,7 @@ class GRITableExtractor:
         if not table.rows:
             return []
 
-        headers = []
+        headers: list[str] = []
         seen_positions = set()
 
         for cell in table.rows[0].cells:
@@ -182,7 +183,7 @@ class GRITableExtractor:
 
         return rows
 
-    def _clean_cell_text(self, cell) -> str:
+    def _clean_cell_text(self, cell: Any) -> str:
         """Nettoie le texte d'une cellule."""
         paragraphs = [p.text.strip() for p in cell.paragraphs if p.text.strip()]
         return " ".join(paragraphs)
