@@ -123,4 +123,3 @@ jobs:
           push: false
           tags: gri-rag-api:test
           cache-from: type=gha
-          cache-to: type=gha,mode=max
