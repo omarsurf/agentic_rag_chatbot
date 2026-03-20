@@ -14,8 +14,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency files
-COPY pyproject.toml ./
+# Copy package metadata and sources needed to build the wheel
+COPY pyproject.toml README.md ./
+COPY src/ ./src/
 
 # Install Python dependencies
 RUN pip install --no-cache-dir build && \
