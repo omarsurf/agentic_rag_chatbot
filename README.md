@@ -1,6 +1,5 @@
 # Agentic RAG System for GRI Innovation Framework
 
-[![CI](https://github.com/omarpiro/agentic_rag/actions/workflows/ci.yml/badge.svg)](https://github.com/omarpiro/agentic_rag/actions/workflows/ci.yml)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
 ![Coverage 80%+](https://img.shields.io/badge/coverage-80%25+-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
